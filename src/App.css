@@ -228,14 +228,16 @@ body {
 }
 
 .mr-comments-panel {
-  padding: 0 0 2px;
+  margin: 0 0 4px;
+  padding: 4px 6px 6px 22px;
+  border-left: 1px solid rgba(106, 133, 165, 0.28);
 }
 
 .mr-comment-list {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  padding: 0 2px 2px;
+  gap: 4px;
+  padding: 2px 2px 0;
 }
 
 .mr-comment-item {
@@ -259,6 +261,10 @@ body {
 
 :root[data-theme="dark"] .mr-comment-item:hover {
   background: #152032;
+}
+
+:root[data-theme="dark"] .mr-comments-panel {
+  border-left-color: #22324a;
 }
 
 .mr-comment-head {
