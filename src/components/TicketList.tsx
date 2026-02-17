@@ -1,4 +1,5 @@
 import { Button, Card, Skeleton } from "@heroui/react";
+import type { CSSProperties } from "react";
 import type { TicketItem } from "../lib/types";
 
 interface TicketListProps {
@@ -16,6 +17,49 @@ function formatRelativeTime(isoDate: string): string {
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h`;
   return `${Math.floor(hours / 24)}d`;
+}
+
+function hashString(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i += 1) {
+    hash = (hash << 5) - hash + input.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function scopedLabelColors(scope: string): CSSProperties {
+  const hue = hashString(scope) % 360;
+
+  return {
+    ["--scope-bg" as string]: `hsl(${hue} 22% 28%)`,
+    ["--scope-fg" as string]: `hsl(${hue} 24% 86%)`,
+    ["--value-bg" as string]: `hsl(${hue} 84% 48%)`,
+    ["--value-fg" as string]: "hsl(0 0% 100%)",
+  };
+}
+
+function renderLabel(label: string, key: string) {
+  const separatorIndex = label.indexOf("::");
+  const isScoped = separatorIndex > 0;
+
+  if (!isScoped) {
+    return (
+      <span key={key} className="linear-label">
+        {label}
+      </span>
+    );
+  }
+
+  const scope = label.slice(0, separatorIndex);
+  const value = label.slice(separatorIndex + 2);
+
+  return (
+    <span key={key} className="scoped-label" style={scopedLabelColors(scope)}>
+      <span className="scoped-label-scope">{scope}</span>
+      <span className="scoped-label-value">{value}</span>
+    </span>
+  );
 }
 
 function LoadingState() {
@@ -67,11 +111,9 @@ export function TicketList({ tickets, loading, error, onOpen, onRetry }: TicketL
             {ticket.labels.length === 0 ? (
               <span className="linear-label linear-label--empty">No label</span>
             ) : (
-              ticket.labels.slice(0, 4).map((label) => (
-                <span key={`${ticket.id}-${label}`} className="linear-label">
-                  {label}
-                </span>
-              ))
+              ticket.labels
+                .slice(0, 4)
+                .map((label) => renderLabel(label, `${ticket.id}-${label}`))
             )}
           </div>
         </button>
