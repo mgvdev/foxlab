@@ -9,12 +9,22 @@ interface CommentsListProps {
   onRetry: () => void;
 }
 
+function formatRelativeTime(isoDate: string): string {
+  const diffMs = Date.now() - Date.parse(isoDate);
+  const minutes = Math.max(1, Math.floor(diffMs / 60_000));
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+}
+
 function LoadingState() {
   return (
-    <div className="flex flex-col gap-2">
-      <Skeleton className="h-20 rounded-xl" />
-      <Skeleton className="h-20 rounded-xl" />
-      <Skeleton className="h-20 rounded-xl" />
+    <div className="flex flex-col gap-1.5">
+      <Skeleton className="h-12 rounded-lg" />
+      <Skeleton className="h-12 rounded-lg" />
+      <Skeleton className="h-12 rounded-lg" />
+      <Skeleton className="h-12 rounded-lg" />
     </div>
   );
 }
@@ -27,7 +37,7 @@ export function CommentsList({ comments, loading, error, onOpen, onRetry }: Comm
   if (error) {
     return (
       <Card>
-        <Card.Content className="flex flex-col gap-3 p-3">
+        <Card.Content className="flex flex-col gap-2 p-3">
           <p className="text-sm text-danger">{error}</p>
           <Button size="sm" onPress={onRetry}>
             Retry
@@ -48,23 +58,15 @@ export function CommentsList({ comments, loading, error, onOpen, onRetry }: Comm
   }
 
   return (
-    <div className="flex max-h-[360px] flex-col gap-2 overflow-y-auto pr-1">
+    <div className="linear-list">
       {comments.map((comment) => (
-        <Button
-          key={comment.key}
-          className="h-auto justify-start px-3 py-2 text-left"
-          variant="tertiary"
-          onPress={() => onOpen(comment.webUrl)}
-        >
-          <div className="flex w-full flex-col gap-1">
-            <div className="flex items-center justify-between gap-2 text-xs text-muted">
-              <span className="truncate">MR !{comment.mrIid}</span>
-              <span>{new Date(comment.createdAt).toLocaleString()}</span>
-            </div>
-            <p className="text-xs text-muted">{comment.authorName}</p>
-            <p className="line-clamp-2 text-sm text-foreground">{comment.body || "(sans contenu)"}</p>
+        <button key={comment.key} className="linear-item" type="button" onClick={() => onOpen(comment.webUrl)}>
+          <div className="linear-item-head">
+            <span className="linear-item-title">MR !{comment.mrIid}</span>
+            <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
           </div>
-        </Button>
+          <p className="linear-item-body">{comment.body || "(sans contenu)"}</p>
+        </button>
       ))}
     </div>
   );

@@ -1,4 +1,4 @@
-import { Button, Chip, Tabs } from "@heroui/react";
+import { Button, Chip } from "@heroui/react";
 import { CommentsList } from "./CommentsList";
 import { MrList } from "./MrList";
 import type { AppSnapshot } from "../lib/types";
@@ -16,6 +16,26 @@ interface TrayPopoverProps {
   onRetry: () => void;
   onOpenComment: (url: string) => void;
   onOpenMr: (url: string) => void;
+}
+
+function CommentIcon() {
+  return (
+    <svg className="segment-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M3 4h14v9H8l-4 3v-3H3z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function MergeIcon() {
+  return (
+    <svg className="segment-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <circle cx="6" cy="4.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="6" cy="15.5" r="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="14" cy="10" r="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 5h2c2 0 3 1 3 3v0" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 15h2c2 0 3-1 3-3v0" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
 }
 
 export function TrayPopover({
@@ -37,45 +57,51 @@ export function TrayPopover({
           <p className="text-sm font-semibold">GitLab Companion</p>
           <p className="text-xs text-muted">
             {snapshot.lastSyncAt
-              ? `Dernière sync: ${new Date(snapshot.lastSyncAt).toLocaleTimeString()}`
+              ? `Sync ${new Date(snapshot.lastSyncAt).toLocaleTimeString()}`
               : "Pas encore synchronisé"}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <Button size="sm" variant="secondary" onPress={onManualRefresh}>
-            {isRefreshing ? "Refresh..." : "Refresh"}
+            {isRefreshing ? "..." : "↻"}
           </Button>
           <Button size="sm" variant="secondary" onPress={onOpenSettings}>
-            Réglages
+            ⚙
           </Button>
         </div>
       </header>
 
-      <Tabs
-        className="w-full"
-        selectedKey={activeTab}
-        onSelectionChange={(key) => onTabChange(String(key) as ActiveTab)}
-      >
-        <Tabs.ListContainer>
-          <Tabs.List aria-label="GitLab sections" className="w-full">
-            <Tabs.Tab id="comments" className="relative">
-              Commentaires
-              <Tabs.Indicator />
-            </Tabs.Tab>
-            <Tabs.Tab id="mrs">
-              MRs
-              <Tabs.Indicator />
-            </Tabs.Tab>
-          </Tabs.List>
-        </Tabs.ListContainer>
-
-        <div className="tab-meta">
-          <Chip color="accent" size="sm" variant="soft">
-            {snapshot.unreadCount} non lu{snapshot.unreadCount > 1 ? "s" : ""}
-          </Chip>
+      <section className="switch-row">
+        <div className="segment-switch" role="tablist" aria-label="Vue">
+          <button
+            aria-selected={activeTab === "comments"}
+            className={`segment-btn ${activeTab === "comments" ? "is-active" : ""}`}
+            role="tab"
+            type="button"
+            onClick={() => onTabChange("comments")}
+          >
+            <span>Commentaires</span>
+            <CommentIcon />
+          </button>
+          <button
+            aria-selected={activeTab === "mrs"}
+            className={`segment-btn ${activeTab === "mrs" ? "is-active" : ""}`}
+            role="tab"
+            type="button"
+            onClick={() => onTabChange("mrs")}
+          >
+            <span>MRs</span>
+            <MergeIcon />
+          </button>
         </div>
 
-        <Tabs.Panel id="comments" className="pt-2">
+        <Chip color="accent" size="sm" variant="soft">
+          {snapshot.unreadCount}
+        </Chip>
+      </section>
+
+      <section className="content-zone">
+        {activeTab === "comments" ? (
           <CommentsList
             comments={snapshot.comments}
             error={snapshot.error}
@@ -83,9 +109,7 @@ export function TrayPopover({
             onOpen={onOpenComment}
             onRetry={onRetry}
           />
-        </Tabs.Panel>
-
-        <Tabs.Panel id="mrs" className="pt-2">
+        ) : (
           <MrList
             error={snapshot.error}
             loading={loading}
@@ -93,8 +117,8 @@ export function TrayPopover({
             onOpen={onOpenMr}
             onRetry={onRetry}
           />
-        </Tabs.Panel>
-      </Tabs>
+        )}
+      </section>
     </main>
   );
 }

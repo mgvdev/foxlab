@@ -3,17 +3,17 @@
 
 :root {
   color: #102027;
-  background: linear-gradient(160deg, #f3f8f8 0%, #e8eff3 100%);
+  background: #f2f5f8;
   font-family: "Avenir Next", "SF Pro Text", "Helvetica Neue", sans-serif;
-  line-height: 1.4;
+  line-height: 1.35;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 :root[data-theme="dark"] {
-  color: #dce9ee;
-  background: linear-gradient(170deg, #0d1418 0%, #121c22 100%);
+  color: #e6edf3;
+  background: #07090d;
 }
 
 html,
@@ -33,50 +33,181 @@ body {
   box-sizing: border-box;
   width: 100%;
   height: 100vh;
-  padding: 10px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  background:
-    radial-gradient(circle at top right, rgba(126, 205, 206, 0.35), transparent 45%),
-    radial-gradient(circle at bottom left, rgba(139, 181, 243, 0.2), transparent 55%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(241, 247, 250, 0.97));
+  gap: 8px;
+  background: #f7fafc;
 }
 
 :root[data-theme="dark"] .menubar-root {
-  background:
-    radial-gradient(circle at top right, rgba(36, 89, 91, 0.45), transparent 50%),
-    radial-gradient(circle at bottom left, rgba(63, 91, 134, 0.35), transparent 58%),
-    linear-gradient(180deg, rgba(17, 25, 31, 0.96), rgba(20, 30, 37, 0.97));
+  background: #090c12;
+  color: #e6edf3;
 }
 
 .menubar-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
 }
 
-.tab-meta {
+.switch-row {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.segment-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  flex: 1;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(27, 44, 66, 0.12);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+:root[data-theme="dark"] .segment-switch {
+  border-color: #1a2230;
+  background: #0f141d;
+}
+
+.segment-btn {
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4d5d71;
+  background: transparent;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] .segment-btn {
+  color: #8f9db2;
+}
+
+.segment-btn.is-active {
+  color: #0d1a2b;
+  background: rgba(91, 129, 174, 0.18);
+}
+
+:root[data-theme="dark"] .segment-btn.is-active {
+  color: #f1f6ff;
+  background: #1a2332;
+}
+
+.segment-icon {
+  width: 13px;
+  height: 13px;
+  opacity: 0.9;
+}
+
+.content-zone {
+  min-height: 0;
+  flex: 1;
+}
+
+.linear-list {
+  height: 100%;
+  overflow-y: auto;
+  border-radius: 9px;
+  border: 1px solid rgba(27, 44, 66, 0.13);
+  background: rgba(255, 255, 255, 0.68);
+}
+
+:root[data-theme="dark"] .linear-list {
+  border-color: #1a2332;
+  background: #0d121b;
+}
+
+.linear-item {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid rgba(30, 48, 70, 0.1);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] .linear-item {
+  border-bottom-color: #1a2332;
+}
+
+.linear-item:last-child {
+  border-bottom: 0;
+}
+
+.linear-item:hover {
+  background: rgba(111, 148, 189, 0.1);
+}
+
+:root[data-theme="dark"] .linear-item:hover {
+  background: #131c29;
+}
+
+.linear-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.linear-item-title {
+  font-size: 12px;
+  font-weight: 600;
+  max-width: 62%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linear-item-meta {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #6d7d93;
+}
+
+:root[data-theme="dark"] .linear-item-meta {
+  color: #8494aa;
+}
+
+.linear-item-body {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #4f6075;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root[data-theme="dark"] .linear-item-body {
+  color: #9caac0;
 }
 
 .settings-hint {
   position: fixed;
-  left: 10px;
-  right: 10px;
-  bottom: 10px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  font-size: 12px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  padding: 7px 8px;
+  border-radius: 8px;
+  font-size: 11px;
   color: #29434e;
   background: rgba(186, 223, 224, 0.45);
-  backdrop-filter: blur(2px);
 }
 
 :root[data-theme="dark"] .settings-hint {
   color: #dce9ee;
-  background: rgba(58, 82, 96, 0.45);
+  background: rgba(58, 82, 96, 0.36);
 }
