@@ -31,6 +31,26 @@ export interface MergeRequestDiscussionNote {
   webUrl: string;
 }
 
+export interface MergeRequestCiJob {
+  id: number;
+  name: string;
+  stage: string;
+  status: string;
+  webUrl: string;
+}
+
+export interface MergeRequestCiStage {
+  name: string;
+  jobs: MergeRequestCiJob[];
+}
+
+export interface MergeRequestCiStatus {
+  pipelineId: number | null;
+  status: string;
+  webUrl: string | null;
+  stages: MergeRequestCiStage[];
+}
+
 export interface CommentItem {
   id: number;
   projectId: number;

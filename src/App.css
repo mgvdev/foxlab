@@ -280,6 +280,108 @@ body {
   padding: 2px 2px 0;
 }
 
+.mr-ci-panel {
+  margin: 0 2px 6px;
+  padding: 6px 7px;
+  border-radius: 7px;
+  background: rgba(109, 140, 174, 0.1);
+}
+
+:root[data-theme="dark"] .mr-ci-panel {
+  background: #101827;
+}
+
+.mr-ci-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mr-ci-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.mr-inline-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #5578a0;
+  font-size: 10px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+:root[data-theme="dark"] .mr-inline-link {
+  color: #94b6e0;
+}
+
+.mr-ci-stages {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.mr-ci-stage-name {
+  margin: 0 0 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #5f738b;
+  text-transform: uppercase;
+}
+
+:root[data-theme="dark"] .mr-ci-stage-name {
+  color: #8ba0b8;
+}
+
+.mr-ci-jobs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.mr-ci-job {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(89, 115, 143, 0.32);
+  border-radius: 999px;
+  padding: 2px 7px;
+  background: rgba(138, 160, 184, 0.12);
+  color: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.mr-ci-job:hover {
+  background: rgba(138, 160, 184, 0.2);
+}
+
+:root[data-theme="dark"] .mr-ci-job {
+  border-color: #2a3a53;
+  background: #162131;
+}
+
+:root[data-theme="dark"] .mr-ci-job:hover {
+  background: #1b2a3f;
+}
+
+.mr-ci-job-name {
+  font-weight: 600;
+}
+
+.mr-ci-job-status {
+  color: #6b8097;
+}
+
+:root[data-theme="dark"] .mr-ci-job-status {
+  color: #9ab0c8;
+}
+
 .mr-comment-item {
   width: 100%;
   border: 0;

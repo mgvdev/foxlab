@@ -12,7 +12,7 @@ import {
   saveSettings,
 } from "./lib/store";
 import { testGitLabConnection } from "./lib/gitlab";
-import { fetchMergeRequestDiscussionNotes } from "./lib/gitlab";
+import { fetchMergeRequestCiStatus, fetchMergeRequestDiscussionNotes } from "./lib/gitlab";
 import { DEFAULT_SETTINGS, type AppSnapshot, type MergeRequestItem, type Settings } from "./lib/types";
 import "./App.css";
 
@@ -192,6 +192,10 @@ function App() {
     (mr: MergeRequestItem) => fetchMergeRequestDiscussionNotes(settings, mr),
     [settings],
   );
+  const handleLoadMrCi = useCallback(
+    (mr: MergeRequestItem) => fetchMergeRequestCiStatus(settings, mr),
+    [settings],
+  );
 
   const canRefresh = useMemo(() => hasValidSettings(settings), [settings]);
 
@@ -207,6 +211,7 @@ function App() {
         onOpenMr={openItem}
         onOpenTicket={openItem}
         onLoadMrComments={handleLoadMrComments}
+        onLoadMrCi={handleLoadMrCi}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}

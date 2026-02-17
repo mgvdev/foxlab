@@ -4,6 +4,8 @@ import {
   type GitLabUser,
   type MergeRequestItem,
   type MergeRequestDiscussionNote,
+  type MergeRequestCiStatus,
+  type MergeRequestCiJob,
   MR_LIMIT,
   NOTES_PER_MR_LIMIT,
   REQUEST_TIMEOUT_MS,
@@ -55,6 +57,20 @@ interface RawDiscussionNote {
 
 interface RawDiscussion {
   notes: RawDiscussionNote[];
+}
+
+interface RawMrPipeline {
+  id: number;
+  status: string;
+  web_url?: string;
+}
+
+interface RawPipelineJob {
+  id: number;
+  name: string;
+  stage: string;
+  status: string;
+  web_url: string;
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
@@ -294,4 +310,58 @@ export async function fetchMergeRequestDiscussionNotes(
   }
 
   return notes.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+}
+
+function groupJobsByStage(jobs: MergeRequestCiJob[]) {
+  const stageMap = new Map<string, MergeRequestCiJob[]>();
+  for (const job of jobs) {
+    const current = stageMap.get(job.stage) ?? [];
+    current.push(job);
+    stageMap.set(job.stage, current);
+  }
+
+  return [...stageMap.entries()].map(([name, stageJobs]) => ({
+    name,
+    jobs: stageJobs,
+  }));
+}
+
+export async function fetchMergeRequestCiStatus(
+  settings: Settings,
+  mr: MergeRequestItem,
+): Promise<MergeRequestCiStatus> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const pipelineSearch = new URLSearchParams({ per_page: "1" });
+  const pipelineUrl = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/pipelines?${pipelineSearch.toString()}`;
+  const pipelines = await fetchJson<RawMrPipeline[]>(pipelineUrl, token, `CI MR !${mr.iid}`);
+  const latest = pipelines[0];
+
+  if (!latest) {
+    return {
+      pipelineId: null,
+      status: "none",
+      webUrl: null,
+      stages: [],
+    };
+  }
+
+  const jobsSearch = new URLSearchParams({ per_page: "100" });
+  const jobsUrl = `${baseUrl}/api/v4/projects/${mr.projectId}/pipelines/${latest.id}/jobs?${jobsSearch.toString()}`;
+  const rawJobs = await fetchJson<RawPipelineJob[]>(jobsUrl, token, `Jobs CI pipeline ${latest.id}`);
+
+  const jobs: MergeRequestCiJob[] = rawJobs.map((job) => ({
+    id: job.id,
+    name: job.name,
+    stage: job.stage,
+    status: job.status,
+    webUrl: job.web_url,
+  }));
+
+  return {
+    pipelineId: latest.id,
+    status: latest.status,
+    webUrl: latest.web_url ?? null,
+    stages: groupJobsByStage(jobs),
+  };
 }

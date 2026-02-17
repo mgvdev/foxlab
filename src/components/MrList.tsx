@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button, Card, Chip, Skeleton } from "@heroui/react";
 import type {
+  MergeRequestCiStatus,
   MergeRequestDiscussionNote,
   MergeRequestItem,
 } from "../lib/types";
@@ -12,6 +13,7 @@ interface MrListProps {
   onOpen: (url: string) => void;
   onRetry: () => void;
   onLoadComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
+  onLoadCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -41,11 +43,13 @@ export function MrList({
   onOpen,
   onRetry,
   onLoadComments,
+  onLoadCi,
 }: MrListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [commentCache, setCommentCache] = useState<Record<number, MergeRequestDiscussionNote[]>>(
     {},
   );
+  const [ciCache, setCiCache] = useState<Record<number, MergeRequestCiStatus>>({});
   const [loadingByMr, setLoadingByMr] = useState<Record<number, boolean>>({});
   const [errorByMr, setErrorByMr] = useState<Record<number, string | null>>({});
 
@@ -62,7 +66,7 @@ export function MrList({
     nextExpanded.add(mr.id);
     setExpandedIds(nextExpanded);
 
-    if (commentCache[mr.id] || loadingByMr[mr.id]) {
+    if ((commentCache[mr.id] && ciCache[mr.id]) || loadingByMr[mr.id]) {
       return;
     }
 
@@ -70,8 +74,9 @@ export function MrList({
     setErrorByMr((current) => ({ ...current, [mr.id]: null }));
 
     try {
-      const comments = await onLoadComments(mr);
+      const [comments, ci] = await Promise.all([onLoadComments(mr), onLoadCi(mr)]);
       setCommentCache((current) => ({ ...current, [mr.id]: comments }));
+      setCiCache((current) => ({ ...current, [mr.id]: ci }));
     } catch (loadError) {
       setErrorByMr((current) => ({
         ...current,
@@ -116,6 +121,7 @@ export function MrList({
       {orderedMrs.map((mr) => {
         const isExpanded = expandedIds.has(mr.id);
         const notes = commentCache[mr.id] ?? [];
+        const ci = ciCache[mr.id];
         const isLoadingComments = loadingByMr[mr.id] ?? false;
         const mrError = errorByMr[mr.id];
 
@@ -148,41 +154,83 @@ export function MrList({
                   <div className="px-2 pb-2">
                     <p className="text-xs text-danger">{mrError}</p>
                   </div>
-                ) : notes.length === 0 ? (
-                  <div className="px-2 pb-2 text-xs text-muted">Aucun commentaire pour cette MR.</div>
                 ) : (
-                  <div className="mr-comment-list">
-                    {notes.slice(0, 20).map((note) => (
-                      <button
-                        key={`${mr.id}-${note.id}`}
-                        className="mr-comment-item"
-                        type="button"
-                        onClick={() => onOpen(note.webUrl)}
-                      >
-                        <div className="mr-comment-head">
-                          <span className="mr-comment-author">{note.authorName}</span>
-                          <div className="flex items-center gap-1.5">
-                            {note.resolvable ? (
-                              <Chip
-                                className="mr-status-chip"
-                                color={note.resolved ? "success" : "warning"}
-                                size="sm"
-                                variant="soft"
-                              >
-                                {note.resolved ? "resolved" : "unresolved"}
-                              </Chip>
-                            ) : (
-                              <Chip className="mr-status-chip" color="default" size="sm" variant="soft">
-                                note
-                              </Chip>
-                            )}
-                            <span className="linear-item-meta">{formatRelativeTime(note.createdAt)}</span>
-                          </div>
+                  <>
+                    <div className="mr-ci-panel">
+                      <div className="mr-ci-head">
+                        <span className="mr-ci-title">CI</span>
+                        <div className="flex items-center gap-1.5">
+                          <Chip className="mr-status-chip" color="default" size="sm" variant="soft">
+                            {ci?.status ?? "unknown"}
+                          </Chip>
+                          {ci?.webUrl && (
+                            <button className="mr-inline-link" type="button" onClick={() => onOpen(ci.webUrl!)}>
+                              Open pipeline
+                            </button>
+                          )}
                         </div>
-                        <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
-                      </button>
-                    ))}
-                  </div>
+                      </div>
+                      <div className="mr-ci-stages">
+                        {(ci?.stages ?? []).map((stage) => (
+                          <div key={`${mr.id}-${stage.name}`} className="mr-ci-stage">
+                            <p className="mr-ci-stage-name">{stage.name}</p>
+                            <div className="mr-ci-jobs">
+                              {stage.jobs.map((job) => (
+                                <button
+                                  key={`${stage.name}-${job.id}`}
+                                  className="mr-ci-job"
+                                  type="button"
+                                  onClick={() => onOpen(job.webUrl)}
+                                >
+                                  <span className="mr-ci-job-name">{job.name}</span>
+                                  <span className="mr-ci-job-status">{job.status}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                        {ci && ci.stages.length === 0 && (
+                          <p className="text-xs text-muted">Aucun job CI disponible.</p>
+                        )}
+                      </div>
+                    </div>
+                    {notes.length === 0 ? (
+                      <div className="px-2 pb-2 text-xs text-muted">Aucun commentaire pour cette MR.</div>
+                    ) : (
+                      <div className="mr-comment-list">
+                        {notes.slice(0, 20).map((note) => (
+                          <button
+                            key={`${mr.id}-${note.id}`}
+                            className="mr-comment-item"
+                            type="button"
+                            onClick={() => onOpen(note.webUrl)}
+                          >
+                            <div className="mr-comment-head">
+                              <span className="mr-comment-author">{note.authorName}</span>
+                              <div className="flex items-center gap-1.5">
+                                {note.resolvable ? (
+                                  <Chip
+                                    className="mr-status-chip"
+                                    color={note.resolved ? "success" : "warning"}
+                                    size="sm"
+                                    variant="soft"
+                                  >
+                                    {note.resolved ? "resolved" : "unresolved"}
+                                  </Chip>
+                                ) : (
+                                  <Chip className="mr-status-chip" color="default" size="sm" variant="soft">
+                                    note
+                                  </Chip>
+                                )}
+                                <span className="linear-item-meta">{formatRelativeTime(note.createdAt)}</span>
+                              </div>
+                            </div>
+                            <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
