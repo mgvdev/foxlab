@@ -18,6 +18,7 @@ import "./App.css";
 const EMPTY_SNAPSHOT: AppSnapshot = {
   mrs: [],
   comments: [],
+  tickets: [],
   unreadCount: 0,
   lastSyncAt: null,
   error: null,
@@ -198,6 +199,7 @@ function App() {
         onManualRefresh={handleManualRefresh}
         onOpenComment={openItem}
         onOpenMr={openItem}
+        onOpenTicket={openItem}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}

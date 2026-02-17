@@ -3,7 +3,12 @@ import {
   requestPermission,
   sendNotification,
 } from "@tauri-apps/plugin-notification";
-import { fetchCurrentUser, fetchRecentComments, fetchTrackedMergeRequests } from "./gitlab";
+import {
+  fetchAssignedTickets,
+  fetchCurrentUser,
+  fetchRecentComments,
+  fetchTrackedMergeRequests,
+} from "./gitlab";
 import { computeUnreadCount, getLatestCommentTimestamp, getNewCommentsSince } from "./state";
 import type { AppSnapshot, Settings } from "./types";
 
@@ -34,9 +39,10 @@ async function ensureNotificationPermission(): Promise<boolean> {
 async function syncOnce(context: PollerContext): Promise<PollerResult> {
   const { settings, lastSeenCommentAt, lastNotifiedCommentAt } = context;
 
-  const [user, mrs] = await Promise.all([
+  const [user, mrs, tickets] = await Promise.all([
     fetchCurrentUser(settings),
     fetchTrackedMergeRequests(settings),
+    fetchAssignedTickets(settings),
   ]);
 
   const comments = await fetchRecentComments(settings, mrs);
@@ -63,6 +69,7 @@ async function syncOnce(context: PollerContext): Promise<PollerResult> {
     snapshot: {
       mrs,
       comments,
+      tickets,
       unreadCount,
       lastSyncAt: new Date().toISOString(),
       error: null,
@@ -110,6 +117,7 @@ export function createGitLabPoller(handlers: PollerHandlers) {
         snapshot: {
           mrs: [],
           comments: [],
+          tickets: [],
           unreadCount: 0,
           lastSyncAt: new Date().toISOString(),
           error: message,

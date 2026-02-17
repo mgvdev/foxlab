@@ -8,6 +8,7 @@ import {
   REQUEST_TIMEOUT_MS,
   type Settings,
   type CommentItem,
+  type TicketItem,
 } from "./types";
 
 interface RawMergeRequest {
@@ -27,6 +28,18 @@ interface RawNote {
   system: boolean;
   created_at: string;
   author?: { id?: number; name?: string };
+}
+
+interface RawIssue {
+  id: number;
+  iid: number;
+  project_id: number;
+  title: string;
+  web_url: string;
+  state: string;
+  updated_at: string;
+  labels: string[];
+  author?: { name?: string };
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
@@ -201,4 +214,31 @@ export async function fetchRecentComments(
   return [...byKey.values()]
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
     .slice(0, COMMENT_LIMIT);
+}
+
+export async function fetchAssignedTickets(settings: Settings): Promise<TicketItem[]> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const search = new URLSearchParams({
+    scope: "assigned_to_me",
+    state: "opened",
+    per_page: String(MR_LIMIT),
+    order_by: "updated_at",
+    sort: "desc",
+  });
+
+  const url = `${baseUrl}/api/v4/issues?${search.toString()}`;
+  const issues = await fetchJson<RawIssue[]>(url, token, "Liste tickets assignés");
+
+  return issues.map((issue) => ({
+    id: issue.id,
+    iid: issue.iid,
+    projectId: issue.project_id,
+    title: issue.title,
+    webUrl: issue.web_url,
+    state: issue.state,
+    authorName: issue.author?.name ?? "Unknown",
+    updatedAt: issue.updated_at,
+    labels: issue.labels ?? [],
+  }));
 }

@@ -34,9 +34,22 @@ export interface CommentItem {
 export interface AppSnapshot {
   mrs: MergeRequestItem[];
   comments: CommentItem[];
+  tickets: TicketItem[];
   unreadCount: number;
   lastSyncAt: string | null;
   error: string | null;
+}
+
+export interface TicketItem {
+  id: number;
+  iid: number;
+  projectId: number;
+  title: string;
+  webUrl: string;
+  state: string;
+  authorName: string;
+  updatedAt: string;
+  labels: string[];
 }
 
 export interface GitLabUser {

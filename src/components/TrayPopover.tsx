@@ -1,9 +1,10 @@
 import { Button, Chip } from "@heroui/react";
 import { CommentsList } from "./CommentsList";
 import { MrList } from "./MrList";
+import { TicketList } from "./TicketList";
 import type { AppSnapshot } from "../lib/types";
 
-export type ActiveTab = "comments" | "mrs";
+export type ActiveTab = "comments" | "mrs" | "tickets";
 
 interface TrayPopoverProps {
   snapshot: AppSnapshot;
@@ -16,6 +17,7 @@ interface TrayPopoverProps {
   onRetry: () => void;
   onOpenComment: (url: string) => void;
   onOpenMr: (url: string) => void;
+  onOpenTicket: (url: string) => void;
 }
 
 function CommentIcon() {
@@ -38,6 +40,14 @@ function MergeIcon() {
   );
 }
 
+function TicketIcon() {
+  return (
+    <svg className="segment-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 17 6.5V9a1.5 1.5 0 1 0 0 3v2.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 14.5V12a1.5 1.5 0 1 0 0-3z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 export function TrayPopover({
   snapshot,
   loading,
@@ -49,6 +59,7 @@ export function TrayPopover({
   onRetry,
   onOpenComment,
   onOpenMr,
+  onOpenTicket,
 }: TrayPopoverProps) {
   return (
     <main className="menubar-root">
@@ -93,6 +104,16 @@ export function TrayPopover({
             <span>MRs</span>
             <MergeIcon />
           </button>
+          <button
+            aria-selected={activeTab === "tickets"}
+            className={`segment-btn ${activeTab === "tickets" ? "is-active" : ""}`}
+            role="tab"
+            type="button"
+            onClick={() => onTabChange("tickets")}
+          >
+            <span>Tickets</span>
+            <TicketIcon />
+          </button>
         </div>
 
         <Chip color="accent" size="sm" variant="soft">
@@ -109,12 +130,20 @@ export function TrayPopover({
             onOpen={onOpenComment}
             onRetry={onRetry}
           />
-        ) : (
+        ) : activeTab === "mrs" ? (
           <MrList
             error={snapshot.error}
             loading={loading}
             mrs={snapshot.mrs}
             onOpen={onOpenMr}
+            onRetry={onRetry}
+          />
+        ) : (
+          <TicketList
+            error={snapshot.error}
+            loading={loading}
+            tickets={snapshot.tickets}
+            onOpen={onOpenTicket}
             onRetry={onRetry}
           />
         )}
