@@ -19,6 +19,18 @@ export interface MergeRequestItem {
   state: "opened" | string;
 }
 
+export interface MergeRequestDiscussionNote {
+  id: number;
+  mrIid: number;
+  projectId: number;
+  body: string;
+  authorName: string;
+  createdAt: string;
+  resolved: boolean;
+  resolvable: boolean;
+  webUrl: string;
+}
+
 export interface CommentItem {
   id: number;
   projectId: number;

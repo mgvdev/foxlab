@@ -3,6 +3,7 @@ import {
   DEFAULT_CONCURRENCY,
   type GitLabUser,
   type MergeRequestItem,
+  type MergeRequestDiscussionNote,
   MR_LIMIT,
   NOTES_PER_MR_LIMIT,
   REQUEST_TIMEOUT_MS,
@@ -40,6 +41,20 @@ interface RawIssue {
   updated_at: string;
   labels: string[];
   author?: { name?: string };
+}
+
+interface RawDiscussionNote {
+  id: number;
+  body: string;
+  system: boolean;
+  created_at: string;
+  resolvable?: boolean;
+  resolved?: boolean;
+  author?: { name?: string };
+}
+
+interface RawDiscussion {
+  notes: RawDiscussionNote[];
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
@@ -241,4 +256,42 @@ export async function fetchAssignedTickets(settings: Settings): Promise<TicketIt
     updatedAt: issue.updated_at,
     labels: issue.labels ?? [],
   }));
+}
+
+export async function fetchMergeRequestDiscussionNotes(
+  settings: Settings,
+  mr: MergeRequestItem,
+): Promise<MergeRequestDiscussionNote[]> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const search = new URLSearchParams({
+    per_page: "50",
+    sort: "desc",
+  });
+
+  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/discussions?${search.toString()}`;
+  const discussions = await fetchJson<RawDiscussion[]>(url, token, `Discussions MR !${mr.iid}`);
+
+  const notes: MergeRequestDiscussionNote[] = [];
+  for (const discussion of discussions) {
+    for (const note of discussion.notes ?? []) {
+      if (note.system) {
+        continue;
+      }
+
+      notes.push({
+        id: note.id,
+        mrIid: mr.iid,
+        projectId: mr.projectId,
+        body: note.body?.trim() ?? "",
+        authorName: note.author?.name ?? "Unknown",
+        createdAt: note.created_at,
+        resolvable: note.resolvable ?? false,
+        resolved: note.resolved ?? false,
+        webUrl: `${mr.webUrl}#note_${note.id}`,
+      });
+    }
+  }
+
+  return notes.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
 }

@@ -2,7 +2,7 @@ import { Button, Chip } from "@heroui/react";
 import { CommentsList } from "./CommentsList";
 import { MrList } from "./MrList";
 import { TicketList } from "./TicketList";
-import type { AppSnapshot } from "../lib/types";
+import type { AppSnapshot, MergeRequestDiscussionNote, MergeRequestItem } from "../lib/types";
 
 export type ActiveTab = "comments" | "mrs" | "tickets";
 
@@ -18,6 +18,7 @@ interface TrayPopoverProps {
   onOpenComment: (url: string) => void;
   onOpenMr: (url: string) => void;
   onOpenTicket: (url: string) => void;
+  onLoadMrComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
 }
 
 function CommentIcon() {
@@ -60,6 +61,7 @@ export function TrayPopover({
   onOpenComment,
   onOpenMr,
   onOpenTicket,
+  onLoadMrComments,
 }: TrayPopoverProps) {
   return (
     <main className="menubar-root">
@@ -136,6 +138,7 @@ export function TrayPopover({
             loading={loading}
             mrs={snapshot.mrs}
             onOpen={onOpenMr}
+            onLoadComments={onLoadMrComments}
             onRetry={onRetry}
           />
         ) : (

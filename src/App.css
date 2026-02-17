@@ -156,6 +156,22 @@ body {
   background: #131c29;
 }
 
+.mr-accordion-item {
+  border-bottom: 1px solid rgba(30, 48, 70, 0.1);
+}
+
+:root[data-theme="dark"] .mr-accordion-item {
+  border-bottom-color: #1a2332;
+}
+
+.mr-accordion-item:last-child {
+  border-bottom: 0;
+}
+
+.mr-item-trigger {
+  border-bottom: 0;
+}
+
 .linear-item-head {
   display: flex;
   align-items: center;
@@ -193,6 +209,86 @@ body {
 
 :root[data-theme="dark"] .linear-item-body {
   color: #9caac0;
+}
+
+.mr-head-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mr-arrow {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 120ms ease;
+}
+
+.mr-arrow.is-open {
+  transform: rotate(180deg);
+}
+
+.mr-comments-panel {
+  padding: 0 0 2px;
+}
+
+.mr-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 2px 2px;
+}
+
+.mr-comment-item {
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 7px;
+  text-align: left;
+  background: rgba(114, 144, 179, 0.08);
+  color: inherit;
+  cursor: pointer;
+}
+
+.mr-comment-item:hover {
+  background: rgba(112, 147, 188, 0.14);
+}
+
+:root[data-theme="dark"] .mr-comment-item {
+  background: #111a27;
+}
+
+:root[data-theme="dark"] .mr-comment-item:hover {
+  background: #152032;
+}
+
+.mr-comment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.mr-comment-author {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mr-comment-body {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #4f6075;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root[data-theme="dark"] .mr-comment-body {
+  color: #9caac0;
+}
+
+.mr-status-chip {
+  font-size: 10px;
+  min-height: 16px;
 }
 
 .linear-labels {

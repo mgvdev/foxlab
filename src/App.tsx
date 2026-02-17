@@ -12,7 +12,8 @@ import {
   saveSettings,
 } from "./lib/store";
 import { testGitLabConnection } from "./lib/gitlab";
-import { DEFAULT_SETTINGS, type AppSnapshot, type Settings } from "./lib/types";
+import { fetchMergeRequestDiscussionNotes } from "./lib/gitlab";
+import { DEFAULT_SETTINGS, type AppSnapshot, type MergeRequestItem, type Settings } from "./lib/types";
 import "./App.css";
 
 const EMPTY_SNAPSHOT: AppSnapshot = {
@@ -187,6 +188,11 @@ function App() {
     }
   }, []);
 
+  const handleLoadMrComments = useCallback(
+    (mr: MergeRequestItem) => fetchMergeRequestDiscussionNotes(settings, mr),
+    [settings],
+  );
+
   const canRefresh = useMemo(() => hasValidSettings(settings), [settings]);
 
   return (
@@ -200,6 +206,7 @@ function App() {
         onOpenComment={openItem}
         onOpenMr={openItem}
         onOpenTicket={openItem}
+        onLoadMrComments={handleLoadMrComments}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}
