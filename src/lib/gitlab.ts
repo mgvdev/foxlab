@@ -1,0 +1,204 @@
+import {
+  COMMENT_LIMIT,
+  DEFAULT_CONCURRENCY,
+  type GitLabUser,
+  type MergeRequestItem,
+  MR_LIMIT,
+  NOTES_PER_MR_LIMIT,
+  REQUEST_TIMEOUT_MS,
+  type Settings,
+  type CommentItem,
+} from "./types";
+
+interface RawMergeRequest {
+  id: number;
+  iid: number;
+  project_id: number;
+  title: string;
+  web_url: string;
+  state: string;
+  updated_at: string;
+  author?: { name?: string };
+}
+
+interface RawNote {
+  id: number;
+  body: string;
+  system: boolean;
+  created_at: string;
+  author?: { id?: number; name?: string };
+}
+
+function normalizeBaseUrl(baseUrl: string): string {
+  return baseUrl.trim().replace(/\/+$/, "");
+}
+
+function createHeaders(token: string): HeadersInit {
+  return {
+    "PRIVATE-TOKEN": token,
+    "Content-Type": "application/json",
+  };
+}
+
+async function fetchWithTimeout(input: string, init: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function buildGitLabError(response: Response, context: string): Error {
+  if (response.status === 401) {
+    return new Error(`${context}: token invalide (401)`);
+  }
+
+  return new Error(`${context}: erreur ${response.status}`);
+}
+
+async function fetchJson<T>(url: string, token: string, context: string): Promise<T> {
+  const response = await fetchWithTimeout(url, {
+    method: "GET",
+    headers: createHeaders(token),
+  });
+
+  if (!response.ok) {
+    throw buildGitLabError(response, context);
+  }
+
+  return (await response.json()) as T;
+}
+
+export async function testGitLabConnection(settings: Settings): Promise<GitLabUser> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+
+  if (!baseUrl || !token) {
+    throw new Error("Base URL et token requis");
+  }
+
+  return fetchJson<GitLabUser>(`${baseUrl}/api/v4/user`, token, "Test connexion");
+}
+
+export async function fetchCurrentUser(settings: Settings): Promise<GitLabUser> {
+  return testGitLabConnection(settings);
+}
+
+async function fetchMergeRequestsByScope(settings: Settings, scope: string): Promise<MergeRequestItem[]> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const search = new URLSearchParams({
+    scope,
+    state: "opened",
+    per_page: String(MR_LIMIT),
+    order_by: "updated_at",
+    sort: "desc",
+  });
+
+  const url = `${baseUrl}/api/v4/merge_requests?${search.toString()}`;
+  const mrs = await fetchJson<RawMergeRequest[]>(url, token, `Liste MRs (${scope})`);
+
+  return mrs.map((mr) => ({
+    id: mr.id,
+    iid: mr.iid,
+    projectId: mr.project_id,
+    title: mr.title,
+    webUrl: mr.web_url,
+    authorName: mr.author?.name ?? "Unknown",
+    updatedAt: mr.updated_at,
+    state: mr.state,
+  }));
+}
+
+export async function fetchTrackedMergeRequests(settings: Settings): Promise<MergeRequestItem[]> {
+  const [assigned, reviews] = await Promise.all([
+    fetchMergeRequestsByScope(settings, "assigned_to_me"),
+    fetchMergeRequestsByScope(settings, "reviews_for_me"),
+  ]);
+
+  const byId = new Map<number, MergeRequestItem>();
+  for (const mr of [...assigned, ...reviews]) {
+    byId.set(mr.id, mr);
+  }
+
+  return [...byId.values()]
+    .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
+    .slice(0, MR_LIMIT);
+}
+
+async function fetchNotesForMr(settings: Settings, mr: MergeRequestItem): Promise<CommentItem[]> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const search = new URLSearchParams({
+    per_page: String(NOTES_PER_MR_LIMIT),
+    sort: "desc",
+  });
+
+  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/notes?${search.toString()}`;
+  const notes = await fetchJson<RawNote[]>(url, token, `Notes MR !${mr.iid}`);
+
+  return notes
+    .filter((note) => !note.system)
+    .map((note) => ({
+      id: note.id,
+      projectId: mr.projectId,
+      mrIid: mr.iid,
+      body: note.body.trim(),
+      authorName: note.author?.name ?? "Unknown",
+      authorId: note.author?.id ?? -1,
+      createdAt: note.created_at,
+      webUrl: `${mr.webUrl}#note_${note.id}`,
+      key: `${mr.projectId}:${mr.iid}:${note.id}`,
+    }));
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  const queue = [...items];
+
+  const workers = Array.from({ length: Math.max(1, limit) }, async () => {
+    while (queue.length > 0) {
+      const next = queue.shift();
+      if (!next) {
+        return;
+      }
+
+      const value = await mapper(next);
+      results.push(value);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+}
+
+export async function fetchRecentComments(
+  settings: Settings,
+  mrs: MergeRequestItem[],
+): Promise<CommentItem[]> {
+  if (mrs.length === 0) {
+    return [];
+  }
+
+  const chunks = await mapWithConcurrency(mrs, DEFAULT_CONCURRENCY, (mr) =>
+    fetchNotesForMr(settings, mr),
+  );
+
+  const byKey = new Map<string, CommentItem>();
+  for (const notes of chunks) {
+    for (const note of notes) {
+      byKey.set(note.key, note);
+    }
+  }
+
+  return [...byKey.values()]
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, COMMENT_LIMIT);
+}
