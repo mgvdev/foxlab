@@ -59,6 +59,10 @@ function App() {
   }, [settings, lastSeenCommentAt, lastNotifiedCommentAt]);
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-theme", settings.theme);
+  }, [settings.theme]);
+
+  useEffect(() => {
     const bootstrap = async () => {
       try {
         const [storedSettings, seenAt, notifiedAt] = await Promise.all([

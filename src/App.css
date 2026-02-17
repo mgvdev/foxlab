@@ -11,6 +11,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+:root[data-theme="dark"] {
+  color: #dce9ee;
+  background: linear-gradient(170deg, #0d1418 0%, #121c22 100%);
+}
+
 html,
 body,
 #root {
@@ -38,6 +43,13 @@ body {
     linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(241, 247, 250, 0.97));
 }
 
+:root[data-theme="dark"] .menubar-root {
+  background:
+    radial-gradient(circle at top right, rgba(36, 89, 91, 0.45), transparent 50%),
+    radial-gradient(circle at bottom left, rgba(63, 91, 134, 0.35), transparent 58%),
+    linear-gradient(180deg, rgba(17, 25, 31, 0.96), rgba(20, 30, 37, 0.97));
+}
+
 .menubar-header {
   display: flex;
   align-items: flex-start;
@@ -62,4 +74,9 @@ body {
   color: #29434e;
   background: rgba(186, 223, 224, 0.45);
   backdrop-filter: blur(2px);
+}
+
+:root[data-theme="dark"] .settings-hint {
+  color: #dce9ee;
+  background: rgba(58, 82, 96, 0.45);
 }

@@ -11,8 +11,8 @@ fn position_main_window_near_tray(
         .map(|size| size.width as i32)
         .unwrap_or(fallback_width);
 
-    let x = (position.x as i32 - (width / 2)).max(0);
-    let y = (position.y as i32 + 10).max(0);
+    let x = position.x as i32 - (width / 2);
+    let y = position.y as i32 + 10;
     let _ = window.set_position(Position::Physical(PhysicalPosition::new(x, y)));
 }
 

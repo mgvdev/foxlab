@@ -6,7 +6,7 @@ import {
   Modal,
   TextField,
 } from "@heroui/react";
-import type { PollIntervalMinutes, Settings } from "../lib/types";
+import type { PollIntervalMinutes, Settings, ThemeMode } from "../lib/types";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -21,6 +21,7 @@ interface SettingsModalProps {
 }
 
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
+const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
 
 export function SettingsModal({
   isOpen,
@@ -77,6 +78,22 @@ export function SettingsModal({
                       onPress={() => onChange({ ...draft, pollIntervalMinutes: value })}
                     >
                       {value}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Thème</p>
+                <ButtonGroup className="w-full">
+                  {THEME_OPTIONS.map((value) => (
+                    <Button
+                      key={value}
+                      className="flex-1"
+                      variant={draft.theme === value ? "primary" : "secondary"}
+                      onPress={() => onChange({ ...draft, theme: value })}
+                    >
+                      {value === "light" ? "Light" : "Dark"}
                     </Button>
                   ))}
                 </ButtonGroup>

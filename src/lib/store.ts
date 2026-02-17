@@ -1,11 +1,12 @@
 import { Store } from "@tauri-apps/plugin-store";
-import { DEFAULT_SETTINGS, type PollIntervalMinutes, type Settings } from "./types";
+import { DEFAULT_SETTINGS, type PollIntervalMinutes, type Settings, type ThemeMode } from "./types";
 
 const STORE_PATH = "foxlab-settings.json";
 
 const SETTINGS_BASE_URL_KEY = "settings.gitlabBaseUrl";
 const SETTINGS_TOKEN_KEY = "settings.personalAccessToken";
 const SETTINGS_POLL_INTERVAL_KEY = "settings.pollIntervalMinutes";
+const SETTINGS_THEME_KEY = "settings.theme";
 
 const LAST_SEEN_COMMENT_AT_KEY = "state.lastSeenCommentAt";
 const LAST_NOTIFIED_COMMENT_AT_KEY = "state.lastNotifiedCommentAt";
@@ -24,13 +25,18 @@ function isPollInterval(value: unknown): value is PollIntervalMinutes {
   return value === 1 || value === 2 || value === 3 || value === 5;
 }
 
+function isThemeMode(value: unknown): value is ThemeMode {
+  return value === "light" || value === "dark";
+}
+
 export async function loadSettings(): Promise<Settings> {
   const store = await getStore();
 
-  const [baseUrl, token, pollInterval] = await Promise.all([
+  const [baseUrl, token, pollInterval, theme] = await Promise.all([
     store.get<string>(SETTINGS_BASE_URL_KEY),
     store.get<string>(SETTINGS_TOKEN_KEY),
     store.get<number>(SETTINGS_POLL_INTERVAL_KEY),
+    store.get<string>(SETTINGS_THEME_KEY),
   ]);
 
   return {
@@ -39,6 +45,7 @@ export async function loadSettings(): Promise<Settings> {
     pollIntervalMinutes: isPollInterval(pollInterval)
       ? pollInterval
       : DEFAULT_SETTINGS.pollIntervalMinutes,
+    theme: isThemeMode(theme) ? theme : DEFAULT_SETTINGS.theme,
   };
 }
 
@@ -49,6 +56,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
     store.set(SETTINGS_BASE_URL_KEY, settings.gitlabBaseUrl),
     store.set(SETTINGS_TOKEN_KEY, settings.personalAccessToken),
     store.set(SETTINGS_POLL_INTERVAL_KEY, settings.pollIntervalMinutes),
+    store.set(SETTINGS_THEME_KEY, settings.theme),
   ]);
 
   await store.save();

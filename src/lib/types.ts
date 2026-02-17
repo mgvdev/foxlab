@@ -1,9 +1,11 @@
 export type PollIntervalMinutes = 1 | 2 | 3 | 5;
+export type ThemeMode = "light" | "dark";
 
 export interface Settings {
   gitlabBaseUrl: string;
   personalAccessToken: string;
   pollIntervalMinutes: PollIntervalMinutes;
+  theme: ThemeMode;
 }
 
 export interface MergeRequestItem {
@@ -47,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   gitlabBaseUrl: "https://gitlab.com",
   personalAccessToken: "",
   pollIntervalMinutes: 2,
+  theme: "light",
 };
 
 export const MR_LIMIT = 20;
