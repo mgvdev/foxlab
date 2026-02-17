@@ -8,6 +8,7 @@ const SETTINGS_TOKEN_KEY = "settings.personalAccessToken";
 const SETTINGS_POLL_INTERVAL_KEY = "settings.pollIntervalMinutes";
 const SETTINGS_THEME_KEY = "settings.theme";
 const SETTINGS_MUTED_MR_IIDS_KEY = "settings.mutedMrIids";
+const SETTINGS_SHOW_COMMENT_AVATARS_KEY = "settings.showCommentAvatars";
 
 const LAST_SEEN_COMMENT_AT_KEY = "state.lastSeenCommentAt";
 const LAST_NOTIFIED_COMMENT_AT_KEY = "state.lastNotifiedCommentAt";
@@ -43,12 +44,13 @@ function parseMutedMrIids(value: unknown): number[] {
 export async function loadSettings(): Promise<Settings> {
   const store = await getStore();
 
-  const [baseUrl, token, pollInterval, theme, mutedMrIids] = await Promise.all([
+  const [baseUrl, token, pollInterval, theme, mutedMrIids, showCommentAvatars] = await Promise.all([
     store.get<string>(SETTINGS_BASE_URL_KEY),
     store.get<string>(SETTINGS_TOKEN_KEY),
     store.get<number>(SETTINGS_POLL_INTERVAL_KEY),
     store.get<string>(SETTINGS_THEME_KEY),
     store.get<unknown>(SETTINGS_MUTED_MR_IIDS_KEY),
+    store.get<boolean>(SETTINGS_SHOW_COMMENT_AVATARS_KEY),
   ]);
 
   return {
@@ -59,6 +61,10 @@ export async function loadSettings(): Promise<Settings> {
       : DEFAULT_SETTINGS.pollIntervalMinutes,
     theme: isThemeMode(theme) ? theme : DEFAULT_SETTINGS.theme,
     mutedMrIids: parseMutedMrIids(mutedMrIids),
+    showCommentAvatars:
+      typeof showCommentAvatars === "boolean"
+        ? showCommentAvatars
+        : DEFAULT_SETTINGS.showCommentAvatars,
   };
 }
 
@@ -71,6 +77,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
     store.set(SETTINGS_POLL_INTERVAL_KEY, settings.pollIntervalMinutes),
     store.set(SETTINGS_THEME_KEY, settings.theme),
     store.set(SETTINGS_MUTED_MR_IIDS_KEY, settings.mutedMrIids),
+    store.set(SETTINGS_SHOW_COMMENT_AVATARS_KEY, settings.showCommentAvatars),
   ]);
 
   await store.save();

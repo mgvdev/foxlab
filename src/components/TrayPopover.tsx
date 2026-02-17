@@ -28,6 +28,7 @@ interface TrayPopoverProps {
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
+  showCommentAvatars: boolean;
 }
 
 function CommentIcon() {
@@ -75,6 +76,7 @@ export function TrayPopover({
   onPlayCiJob,
   mutedMrIids,
   onToggleMuteMrIid,
+  showCommentAvatars,
 }: TrayPopoverProps) {
   return (
     <main className="menubar-root">
@@ -144,6 +146,7 @@ export function TrayPopover({
             loading={loading}
             onOpen={onOpenComment}
             onRetry={onRetry}
+            showAvatars={showCommentAvatars}
           />
         ) : activeTab === "mrs" ? (
           <MrList
@@ -156,6 +159,7 @@ export function TrayPopover({
             onPlayCiJob={onPlayCiJob}
             mutedMrIids={mutedMrIids}
             onToggleMuteMrIid={onToggleMuteMrIid}
+            showAvatars={showCommentAvatars}
             onRetry={onRetry}
           />
         ) : (

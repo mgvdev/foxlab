@@ -7,6 +7,7 @@ export interface Settings {
   pollIntervalMinutes: PollIntervalMinutes;
   theme: ThemeMode;
   mutedMrIids: number[];
+  showCommentAvatars: boolean;
 }
 
 export interface MergeRequestItem {
@@ -26,6 +27,7 @@ export interface MergeRequestDiscussionNote {
   projectId: number;
   body: string;
   authorName: string;
+  authorAvatarUrl: string | null;
   createdAt: string;
   resolved: boolean;
   resolvable: boolean;
@@ -58,6 +60,7 @@ export interface CommentItem {
   mrIid: number;
   body: string;
   authorName: string;
+  authorAvatarUrl: string | null;
   authorId: number;
   createdAt: string;
   webUrl: string;
@@ -97,6 +100,7 @@ export const DEFAULT_SETTINGS: Settings = {
   pollIntervalMinutes: 2,
   theme: "light",
   mutedMrIids: [],
+  showCommentAvatars: true,
 };
 
 export const MR_LIMIT = 20;

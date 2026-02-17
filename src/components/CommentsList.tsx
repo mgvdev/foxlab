@@ -7,6 +7,7 @@ interface CommentsListProps {
   error: string | null;
   onOpen: (url: string) => void;
   onRetry: () => void;
+  showAvatars: boolean;
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -29,7 +30,19 @@ function LoadingState() {
   );
 }
 
-export function CommentsList({ comments, loading, error, onOpen, onRetry }: CommentsListProps) {
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/).slice(0, 2);
+  return parts.map((part) => part.charAt(0).toUpperCase()).join("") || "?";
+}
+
+export function CommentsList({
+  comments,
+  loading,
+  error,
+  onOpen,
+  onRetry,
+  showAvatars,
+}: CommentsListProps) {
   if (loading) {
     return <LoadingState />;
   }
@@ -61,8 +74,21 @@ export function CommentsList({ comments, loading, error, onOpen, onRetry }: Comm
     <div className="linear-list">
       {comments.map((comment) => (
         <button key={comment.key} className="linear-item" type="button" onClick={() => onOpen(comment.webUrl)}>
-          <div className="linear-item-head">
-            <span className="linear-item-title">MR !{comment.mrIid}</span>
+          <div className="linear-item-head comment-row-head">
+            <div className="comment-head-main">
+              {showAvatars && (
+                comment.authorAvatarUrl ? (
+                  <img
+                    alt={comment.authorName}
+                    className="comment-avatar"
+                    src={comment.authorAvatarUrl}
+                  />
+                ) : (
+                  <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
+                )
+              )}
+              <span className="linear-item-title">MR !{comment.mrIid}</span>
+            </div>
             <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
           </div>
           <p className="linear-item-body">{comment.body || "(sans contenu)"}</p>

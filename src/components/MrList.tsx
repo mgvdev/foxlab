@@ -17,6 +17,7 @@ interface MrListProps {
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
+  showAvatars: boolean;
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -84,6 +85,7 @@ export function MrList({
   onPlayCiJob,
   mutedMrIids,
   onToggleMuteMrIid,
+  showAvatars,
 }: MrListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [commentCache, setCommentCache] = useState<Record<number, MergeRequestDiscussionNote[]>>(
@@ -172,6 +174,14 @@ export function MrList({
       }),
     [mrs, mutedSet],
   );
+
+  const initials = (name: string) =>
+    name
+      .trim()
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join("") || "?";
 
   if (loading) {
     return <LoadingState />;
@@ -351,7 +361,22 @@ export function MrList({
                             onClick={() => onOpen(note.webUrl)}
                           >
                             <div className="mr-comment-head">
-                              <span className="mr-comment-author">{note.authorName}</span>
+                              <div className="mr-comment-author-wrap">
+                                {showAvatars && (
+                                  note.authorAvatarUrl ? (
+                                    <img
+                                      alt={note.authorName}
+                                      className="comment-avatar"
+                                      src={note.authorAvatarUrl}
+                                    />
+                                  ) : (
+                                    <span className="comment-avatar comment-avatar-fallback">
+                                      {initials(note.authorName)}
+                                    </span>
+                                  )
+                                )}
+                                <span className="mr-comment-author">{note.authorName}</span>
+                              </div>
                               <div className="flex items-center gap-1.5">
                                 {note.resolvable ? (
                                   <Chip

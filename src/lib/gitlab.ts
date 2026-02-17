@@ -30,7 +30,7 @@ interface RawNote {
   body: string;
   system: boolean;
   created_at: string;
-  author?: { id?: number; name?: string };
+  author?: { id?: number; name?: string; avatar_url?: string | null };
 }
 
 interface RawIssue {
@@ -52,7 +52,7 @@ interface RawDiscussionNote {
   created_at: string;
   resolvable?: boolean;
   resolved?: boolean;
-  author?: { name?: string };
+  author?: { name?: string; avatar_url?: string | null };
 }
 
 interface RawDiscussion {
@@ -203,6 +203,7 @@ async function fetchNotesForMr(settings: Settings, mr: MergeRequestItem): Promis
       mrIid: mr.iid,
       body: note.body.trim(),
       authorName: note.author?.name ?? "Unknown",
+      authorAvatarUrl: note.author?.avatar_url ?? null,
       authorId: note.author?.id ?? -1,
       createdAt: note.created_at,
       webUrl: `${mr.webUrl}#note_${note.id}`,
@@ -312,6 +313,7 @@ export async function fetchMergeRequestDiscussionNotes(
         projectId: mr.projectId,
         body: note.body?.trim() ?? "",
         authorName: note.author?.name ?? "Unknown",
+        authorAvatarUrl: note.author?.avatar_url ?? null,
         createdAt: note.created_at,
         resolvable: note.resolvable ?? false,
         resolved: note.resolved ?? false,

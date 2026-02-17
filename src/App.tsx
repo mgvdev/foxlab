@@ -240,6 +240,7 @@ function App() {
         onPlayCiJob={handlePlayCiJob}
         mutedMrIids={settings.mutedMrIids}
         onToggleMuteMrIid={handleToggleMuteMrIid}
+        showCommentAvatars={settings.showCommentAvatars}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}

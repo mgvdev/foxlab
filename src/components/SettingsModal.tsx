@@ -22,6 +22,7 @@ interface SettingsModalProps {
 
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
+const AVATAR_OPTIONS = [true, false] as const;
 
 function parseMutedIids(raw: string): number[] {
   return raw
@@ -119,6 +120,22 @@ export function SettingsModal({
                   }
                 />
               </TextField>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Afficher les avatars commentaires</p>
+                <ButtonGroup className="w-full">
+                  {AVATAR_OPTIONS.map((value) => (
+                    <Button
+                      key={String(value)}
+                      className="flex-1"
+                      variant={draft.showCommentAvatars === value ? "primary" : "secondary"}
+                      onPress={() => onChange({ ...draft, showCommentAvatars: value })}
+                    >
+                      {value ? "Oui" : "Non"}
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </div>
 
               {testConnectionResult && (
                 <p className="text-sm text-muted">{testConnectionResult}</p>
