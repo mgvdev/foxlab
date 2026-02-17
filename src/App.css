@@ -170,6 +170,15 @@ body {
   border-bottom: 0;
 }
 
+.mr-muted {
+  opacity: 0.46;
+  filter: grayscale(0.35);
+}
+
+.mr-muted .mr-comments-panel {
+  opacity: 0.86;
+}
+
 .mr-item-trigger {
   border-bottom: 0;
   display: flex;

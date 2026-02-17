@@ -15,6 +15,7 @@ interface MrListProps {
   onLoadComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
+  mutedMrIids: number[];
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -80,6 +81,7 @@ export function MrList({
   onLoadComments,
   onLoadCi,
   onPlayCiJob,
+  mutedMrIids,
 }: MrListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [commentCache, setCommentCache] = useState<Record<number, MergeRequestDiscussionNote[]>>(
@@ -153,7 +155,21 @@ export function MrList({
     }
   };
 
-  const orderedMrs = useMemo(() => mrs, [mrs]);
+  const mutedSet = useMemo(() => new Set(mutedMrIids), [mutedMrIids]);
+
+  const orderedMrs = useMemo(
+    () =>
+      [...mrs].sort((a, b) => {
+        const aMuted = mutedSet.has(a.iid) ? 1 : 0;
+        const bMuted = mutedSet.has(b.iid) ? 1 : 0;
+        if (aMuted !== bMuted) {
+          return aMuted - bMuted;
+        }
+
+        return Date.parse(b.updatedAt) - Date.parse(a.updatedAt);
+      }),
+    [mrs, mutedSet],
+  );
 
   if (loading) {
     return <LoadingState />;
@@ -185,6 +201,7 @@ export function MrList({
   return (
     <div className="linear-list">
       {orderedMrs.map((mr) => {
+        const isMuted = mutedSet.has(mr.iid);
         const isExpanded = expandedIds.has(mr.id);
         const notes = commentCache[mr.id] ?? [];
         const ci = ciCache[mr.id];
@@ -192,7 +209,7 @@ export function MrList({
         const mrError = errorByMr[mr.id];
 
         return (
-          <div key={mr.id} className="mr-accordion-item">
+          <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
             <div className="linear-item mr-item-trigger">
               <button className="mr-toggle-btn" type="button" onClick={() => void toggleMr(mr)}>
                 <div className="linear-item-head">

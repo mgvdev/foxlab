@@ -23,6 +23,13 @@ interface SettingsModalProps {
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
 
+function parseMutedIids(raw: string): number[] {
+  return raw
+    .split(",")
+    .map((entry) => Number(entry.trim()))
+    .filter((value) => Number.isInteger(value) && value > 0);
+}
+
 export function SettingsModal({
   isOpen,
   draft,
@@ -98,6 +105,20 @@ export function SettingsModal({
                   ))}
                 </ButtonGroup>
               </div>
+
+              <TextField>
+                <Label>MRs à atténuer (IID, séparés par virgule)</Label>
+                <Input
+                  placeholder="ex: 1234, 1402, 2201"
+                  value={draft.mutedMrIids.join(", ")}
+                  onChange={(event) =>
+                    onChange({
+                      ...draft,
+                      mutedMrIids: parseMutedIids(event.currentTarget.value),
+                    })
+                  }
+                />
+              </TextField>
 
               {testConnectionResult && (
                 <p className="text-sm text-muted">{testConnectionResult}</p>

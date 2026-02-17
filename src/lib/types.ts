@@ -6,6 +6,7 @@ export interface Settings {
   personalAccessToken: string;
   pollIntervalMinutes: PollIntervalMinutes;
   theme: ThemeMode;
+  mutedMrIids: number[];
 }
 
 export interface MergeRequestItem {
@@ -95,6 +96,7 @@ export const DEFAULT_SETTINGS: Settings = {
   personalAccessToken: "",
   pollIntervalMinutes: 2,
   theme: "light",
+  mutedMrIids: [],
 };
 
 export const MR_LIMIT = 20;

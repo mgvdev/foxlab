@@ -217,6 +217,7 @@ function App() {
         onLoadMrComments={handleLoadMrComments}
         onLoadMrCi={handleLoadMrCi}
         onPlayCiJob={handlePlayCiJob}
+        mutedMrIids={settings.mutedMrIids}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}

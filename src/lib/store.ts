@@ -7,6 +7,7 @@ const SETTINGS_BASE_URL_KEY = "settings.gitlabBaseUrl";
 const SETTINGS_TOKEN_KEY = "settings.personalAccessToken";
 const SETTINGS_POLL_INTERVAL_KEY = "settings.pollIntervalMinutes";
 const SETTINGS_THEME_KEY = "settings.theme";
+const SETTINGS_MUTED_MR_IIDS_KEY = "settings.mutedMrIids";
 
 const LAST_SEEN_COMMENT_AT_KEY = "state.lastSeenCommentAt";
 const LAST_NOTIFIED_COMMENT_AT_KEY = "state.lastNotifiedCommentAt";
@@ -29,14 +30,25 @@ function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "dark";
 }
 
+function parseMutedMrIids(value: unknown): number[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => Number(item))
+    .filter((item) => Number.isInteger(item) && item > 0);
+}
+
 export async function loadSettings(): Promise<Settings> {
   const store = await getStore();
 
-  const [baseUrl, token, pollInterval, theme] = await Promise.all([
+  const [baseUrl, token, pollInterval, theme, mutedMrIids] = await Promise.all([
     store.get<string>(SETTINGS_BASE_URL_KEY),
     store.get<string>(SETTINGS_TOKEN_KEY),
     store.get<number>(SETTINGS_POLL_INTERVAL_KEY),
     store.get<string>(SETTINGS_THEME_KEY),
+    store.get<unknown>(SETTINGS_MUTED_MR_IIDS_KEY),
   ]);
 
   return {
@@ -46,6 +58,7 @@ export async function loadSettings(): Promise<Settings> {
       ? pollInterval
       : DEFAULT_SETTINGS.pollIntervalMinutes,
     theme: isThemeMode(theme) ? theme : DEFAULT_SETTINGS.theme,
+    mutedMrIids: parseMutedMrIids(mutedMrIids),
   };
 }
 
@@ -57,6 +70,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
     store.set(SETTINGS_TOKEN_KEY, settings.personalAccessToken),
     store.set(SETTINGS_POLL_INTERVAL_KEY, settings.pollIntervalMinutes),
     store.set(SETTINGS_THEME_KEY, settings.theme),
+    store.set(SETTINGS_MUTED_MR_IIDS_KEY, settings.mutedMrIids),
   ]);
 
   await store.save();
