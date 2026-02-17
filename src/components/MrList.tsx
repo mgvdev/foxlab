@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Card, Chip, Popover, Skeleton } from "@heroui/react";
+import { Button, Card, Chip, Popover, Skeleton, Tooltip } from "@heroui/react";
 import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,
@@ -164,7 +164,17 @@ export function MrList({
             <div className="linear-item mr-item-trigger">
               <button className="mr-toggle-btn" type="button" onClick={() => void toggleMr(mr)}>
                 <div className="linear-item-head">
-                  <span className="linear-item-title">!{mr.iid} · {mr.title}</span>
+                  <div className="mr-title-wrap">
+                    <Tooltip delay={150}>
+                      <Tooltip.Trigger aria-label={`MR !${mr.iid}`}>
+                        <span className="linear-item-title">!{mr.iid} · {mr.title}</span>
+                      </Tooltip.Trigger>
+                      <Tooltip.Content className="mr-title-tooltip" showArrow>
+                        <Tooltip.Arrow />
+                        <span>!{mr.iid} · {mr.title}</span>
+                      </Tooltip.Content>
+                    </Tooltip>
+                  </div>
                   <span className="linear-item-meta mr-head-meta">
                     <span>{formatRelativeTime(mr.updatedAt)}</span>
                     <span className={`mr-arrow ${isExpanded ? "is-open" : ""}`}>▾</span>
