@@ -170,6 +170,46 @@ body {
 
 .mr-item-trigger {
   border-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mr-toggle-btn {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
+.mr-open-btn {
+  flex-shrink: 0;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 6px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: rgba(109, 146, 187, 0.12);
+  color: #2f4660;
+  cursor: pointer;
+}
+
+.mr-open-btn:hover {
+  background: rgba(109, 146, 187, 0.2);
+}
+
+:root[data-theme="dark"] .mr-open-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-open-btn:hover {
+  background: #1b2a3f;
 }
 
 .linear-item-head {

@@ -121,16 +121,21 @@ export function MrList({
 
         return (
           <div key={mr.id} className="mr-accordion-item">
-            <button className="linear-item mr-item-trigger" type="button" onClick={() => void toggleMr(mr)}>
-              <div className="linear-item-head">
-                <span className="linear-item-title">!{mr.iid} · {mr.title}</span>
-                <span className="linear-item-meta mr-head-meta">
-                  <span>{formatRelativeTime(mr.updatedAt)}</span>
-                  <span className={`mr-arrow ${isExpanded ? "is-open" : ""}`}>▾</span>
-                </span>
-              </div>
-              <p className="linear-item-body">{mr.authorName}</p>
-            </button>
+            <div className="linear-item mr-item-trigger">
+              <button className="mr-toggle-btn" type="button" onClick={() => void toggleMr(mr)}>
+                <div className="linear-item-head">
+                  <span className="linear-item-title">!{mr.iid} · {mr.title}</span>
+                  <span className="linear-item-meta mr-head-meta">
+                    <span>{formatRelativeTime(mr.updatedAt)}</span>
+                    <span className={`mr-arrow ${isExpanded ? "is-open" : ""}`}>▾</span>
+                  </span>
+                </div>
+                <p className="linear-item-body">{mr.authorName}</p>
+              </button>
+              <button className="mr-open-btn" type="button" onClick={() => onOpen(mr.webUrl)}>
+                Open
+              </button>
+            </div>
 
             {isExpanded && (
               <div className="mr-comments-panel">
