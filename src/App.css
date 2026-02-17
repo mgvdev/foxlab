@@ -326,6 +326,106 @@ body {
   gap: 5px;
 }
 
+.mr-ci-icons {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mr-ci-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid #2f3b4f;
+  background: #1b2330;
+  color: #dbe7f6;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mr-ci-icon:hover {
+  filter: brightness(1.08);
+}
+
+.mr-ci-icon--success {
+  border-color: #2fbf71;
+  color: #2fbf71;
+}
+
+.mr-ci-icon--failed,
+.mr-ci-icon--canceled {
+  border-color: #ef6a75;
+  color: #ef6a75;
+}
+
+.mr-ci-icon--running {
+  border-color: #6aa3ff;
+  color: #6aa3ff;
+}
+
+.mr-ci-icon--pending,
+.mr-ci-icon--created,
+.mr-ci-icon--waiting_for_resource,
+.mr-ci-icon--manual {
+  border-color: #e5a93d;
+  color: #e5a93d;
+}
+
+.mr-ci-popover {
+  min-width: 260px;
+  max-width: 320px;
+}
+
+.mr-ci-popover-title {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mr-ci-popover-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mr-ci-popover-job {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid rgba(89, 115, 143, 0.25);
+  border-radius: 8px;
+  padding: 5px 7px;
+  background: rgba(138, 160, 184, 0.08);
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.mr-ci-popover-job:hover {
+  background: rgba(138, 160, 184, 0.16);
+}
+
+.mr-ci-popover-job-name {
+  font-weight: 600;
+}
+
+.mr-ci-popover-job-status {
+  font-size: 10px;
+  color: #6f859e;
+}
+
+:root[data-theme="dark"] .mr-ci-popover-job-status {
+  color: #9ab0c8;
+}
+
 .mr-ci-stage-name {
   margin: 0 0 3px;
   font-size: 10px;

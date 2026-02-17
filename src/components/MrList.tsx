@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Card, Chip, Skeleton } from "@heroui/react";
+import { Button, Card, Chip, Popover, Skeleton } from "@heroui/react";
 import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,
@@ -34,6 +34,40 @@ function LoadingState() {
       <Skeleton className="h-11 rounded-lg" />
     </div>
   );
+}
+
+function statusPriority(status: string): number {
+  const normalized = status.toLowerCase();
+  if (normalized === "failed") return 6;
+  if (normalized === "canceled") return 5;
+  if (normalized === "running") return 4;
+  if (normalized === "pending" || normalized === "created" || normalized === "waiting_for_resource")
+    return 3;
+  if (normalized === "manual") return 2;
+  if (normalized === "success") return 1;
+  return 0;
+}
+
+function aggregateStageStatus(statuses: string[]): string {
+  if (statuses.length === 0) return "none";
+
+  let winner = statuses[0];
+  for (const status of statuses.slice(1)) {
+    if (statusPriority(status) > statusPriority(winner)) {
+      winner = status;
+    }
+  }
+  return winner;
+}
+
+function ciIconByStatus(status: string): string {
+  const normalized = status.toLowerCase();
+  if (normalized === "success") return "✓";
+  if (normalized === "failed" || normalized === "canceled") return "!";
+  if (normalized === "running") return "▶";
+  if (normalized === "pending" || normalized === "created") return "…";
+  if (normalized === "manual") return "⏸";
+  return "•";
 }
 
 export function MrList({
@@ -170,25 +204,45 @@ export function MrList({
                           )}
                         </div>
                       </div>
-                      <div className="mr-ci-stages">
-                        {(ci?.stages ?? []).map((stage) => (
-                          <div key={`${mr.id}-${stage.name}`} className="mr-ci-stage">
-                            <p className="mr-ci-stage-name">{stage.name}</p>
-                            <div className="mr-ci-jobs">
-                              {stage.jobs.map((job) => (
+                      <div className="mr-ci-icons">
+                        {(ci?.stages ?? []).map((stage) => {
+                          const stageStatus = aggregateStageStatus(
+                            stage.jobs.map((job) => job.status),
+                          );
+
+                          return (
+                            <Popover key={`${mr.id}-${stage.name}`}>
+                              <Popover.Trigger aria-label={`Stage ${stage.name}`}>
                                 <button
-                                  key={`${stage.name}-${job.id}`}
-                                  className="mr-ci-job"
+                                  className={`mr-ci-icon mr-ci-icon--${stageStatus.toLowerCase()}`}
                                   type="button"
-                                  onClick={() => onOpen(job.webUrl)}
                                 >
-                                  <span className="mr-ci-job-name">{job.name}</span>
-                                  <span className="mr-ci-job-status">{job.status}</span>
+                                  <span>{ciIconByStatus(stageStatus)}</span>
                                 </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
+                              </Popover.Trigger>
+                              <Popover.Content className="mr-ci-popover">
+                                <Popover.Dialog>
+                                  <Popover.Heading className="mr-ci-popover-title">
+                                    Stage: {stage.name}
+                                  </Popover.Heading>
+                                  <div className="mr-ci-popover-jobs">
+                                    {stage.jobs.map((job) => (
+                                      <button
+                                        key={`${stage.name}-${job.id}`}
+                                        className="mr-ci-popover-job"
+                                        type="button"
+                                        onClick={() => onOpen(job.webUrl)}
+                                      >
+                                        <span className="mr-ci-popover-job-name">{job.name}</span>
+                                        <span className="mr-ci-popover-job-status">{job.status}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </Popover.Dialog>
+                              </Popover.Content>
+                            </Popover>
+                          );
+                        })}
                         {ci && ci.stages.length === 0 && (
                           <p className="text-xs text-muted">Aucun job CI disponible.</p>
                         )}
