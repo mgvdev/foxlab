@@ -27,6 +27,7 @@ interface TrayPopoverProps {
   onLoadMrCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
   mutedMrIids: number[];
+  onToggleMuteMrIid: (iid: number) => void;
 }
 
 function CommentIcon() {
@@ -73,6 +74,7 @@ export function TrayPopover({
   onLoadMrCi,
   onPlayCiJob,
   mutedMrIids,
+  onToggleMuteMrIid,
 }: TrayPopoverProps) {
   return (
     <main className="menubar-root">
@@ -153,6 +155,7 @@ export function TrayPopover({
             onLoadComments={onLoadMrComments}
             onPlayCiJob={onPlayCiJob}
             mutedMrIids={mutedMrIids}
+            onToggleMuteMrIid={onToggleMuteMrIid}
             onRetry={onRetry}
           />
         ) : (

@@ -16,6 +16,7 @@ interface MrListProps {
   onLoadCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
   mutedMrIids: number[];
+  onToggleMuteMrIid: (iid: number) => void;
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -82,6 +83,7 @@ export function MrList({
   onLoadCi,
   onPlayCiJob,
   mutedMrIids,
+  onToggleMuteMrIid,
 }: MrListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [commentCache, setCommentCache] = useState<Record<number, MergeRequestDiscussionNote[]>>(
@@ -234,6 +236,24 @@ export function MrList({
               <button className="mr-open-btn" type="button" onClick={() => onOpen(mr.webUrl)}>
                 Open
               </button>
+              <Popover>
+                <Popover.Trigger aria-label="MR actions">
+                  <button className="mr-more-btn" type="button">
+                    ⋯
+                  </button>
+                </Popover.Trigger>
+                <Popover.Content className="mr-row-menu">
+                  <Popover.Dialog>
+                    <button
+                      className="mr-row-menu-btn"
+                      type="button"
+                      onClick={() => onToggleMuteMrIid(mr.iid)}
+                    >
+                      {isMuted ? "Réafficher cette MR" : "Masquer cette MR"}
+                    </button>
+                  </Popover.Dialog>
+                </Popover.Content>
+              </Popover>
             </div>
 
             {isExpanded && (

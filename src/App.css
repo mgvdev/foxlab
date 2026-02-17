@@ -224,6 +224,62 @@ body {
   background: #1b2a3f;
 }
 
+.mr-more-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 6px;
+  background: rgba(109, 146, 187, 0.12);
+  color: #2f4660;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mr-more-btn:hover {
+  background: rgba(109, 146, 187, 0.2);
+}
+
+:root[data-theme="dark"] .mr-more-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-more-btn:hover {
+  background: #1b2a3f;
+}
+
+.mr-row-menu {
+  min-width: 170px;
+}
+
+.mr-row-menu-btn {
+  width: 100%;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(138, 160, 184, 0.1);
+  color: inherit;
+  text-align: left;
+  padding: 7px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mr-row-menu-btn:hover {
+  background: rgba(138, 160, 184, 0.2);
+}
+
+:root[data-theme="dark"] .mr-row-menu-btn {
+  background: #162131;
+}
+
+:root[data-theme="dark"] .mr-row-menu-btn:hover {
+  background: #1b2a3f;
+}
+
 .linear-item-head {
   display: flex;
   align-items: center;

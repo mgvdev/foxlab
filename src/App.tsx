@@ -200,6 +200,27 @@ function App() {
     (projectId: number, jobId: number) => playCiJob(settings, projectId, jobId),
     [settings],
   );
+  const handleToggleMuteMrIid = useCallback((iid: number) => {
+    setSettings((current) => {
+      const muted = current.mutedMrIids.includes(iid);
+      const next = {
+        ...current,
+        mutedMrIids: muted
+          ? current.mutedMrIids.filter((value) => value !== iid)
+          : [...current.mutedMrIids, iid],
+      };
+
+      setSettingsDraft(next);
+      void saveSettings(next).catch((error) => {
+        setSnapshot((snapshotState) => ({
+          ...snapshotState,
+          error: error instanceof Error ? error.message : "Impossible de sauvegarder le masquage MR",
+        }));
+      });
+
+      return next;
+    });
+  }, []);
 
   const canRefresh = useMemo(() => hasValidSettings(settings), [settings]);
 
@@ -218,6 +239,7 @@ function App() {
         onLoadMrCi={handleLoadMrCi}
         onPlayCiJob={handlePlayCiJob}
         mutedMrIids={settings.mutedMrIids}
+        onToggleMuteMrIid={handleToggleMuteMrIid}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}
