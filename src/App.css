@@ -422,17 +422,37 @@ body {
   border-radius: 8px;
   padding: 5px 7px;
   background: rgba(138, 160, 184, 0.08);
-  color: inherit;
   font-size: 11px;
+}
+
+.mr-ci-popover-job-link {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
   cursor: pointer;
 }
 
-.mr-ci-popover-job:hover {
-  background: rgba(138, 160, 184, 0.16);
+.mr-ci-popover-job-link:hover {
+  text-decoration: underline;
 }
 
 .mr-ci-popover-job-name {
+  display: block;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mr-ci-popover-job-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .mr-ci-popover-job-status {
@@ -442,6 +462,32 @@ body {
 
 :root[data-theme="dark"] .mr-ci-popover-job-status {
   color: #9ab0c8;
+}
+
+.mr-ci-run-btn {
+  height: 20px;
+  border: 1px solid rgba(89, 115, 143, 0.35);
+  border-radius: 6px;
+  padding: 0 6px;
+  background: rgba(93, 137, 190, 0.16);
+  color: #32506e;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mr-ci-run-btn:hover {
+  background: rgba(93, 137, 190, 0.24);
+}
+
+:root[data-theme="dark"] .mr-ci-run-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-ci-run-btn:hover {
+  background: #1b2a3f;
 }
 
 .mr-ci-stage-name {

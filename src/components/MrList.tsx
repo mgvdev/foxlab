@@ -14,6 +14,7 @@ interface MrListProps {
   onRetry: () => void;
   onLoadComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
+  onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
 }
 
 function formatRelativeTime(isoDate: string): string {
@@ -78,6 +79,7 @@ export function MrList({
   onRetry,
   onLoadComments,
   onLoadCi,
+  onPlayCiJob,
 }: MrListProps) {
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
   const [commentCache, setCommentCache] = useState<Record<number, MergeRequestDiscussionNote[]>>(
@@ -86,6 +88,36 @@ export function MrList({
   const [ciCache, setCiCache] = useState<Record<number, MergeRequestCiStatus>>({});
   const [loadingByMr, setLoadingByMr] = useState<Record<number, boolean>>({});
   const [errorByMr, setErrorByMr] = useState<Record<number, string | null>>({});
+  const [runningJobIds, setRunningJobIds] = useState<Set<number>>(new Set());
+
+  const handlePlayManualJob = async (mr: MergeRequestItem, jobId: number) => {
+    if (runningJobIds.has(jobId)) {
+      return;
+    }
+
+    setRunningJobIds((current) => {
+      const copy = new Set(current);
+      copy.add(jobId);
+      return copy;
+    });
+
+    try {
+      await onPlayCiJob(mr.projectId, jobId);
+      const refreshedCi = await onLoadCi(mr);
+      setCiCache((current) => ({ ...current, [mr.id]: refreshedCi }));
+    } catch (error) {
+      setErrorByMr((current) => ({
+        ...current,
+        [mr.id]: error instanceof Error ? error.message : "Impossible de lancer le job manuel",
+      }));
+    } finally {
+      setRunningJobIds((current) => {
+        const copy = new Set(current);
+        copy.delete(jobId);
+        return copy;
+      });
+    }
+  };
 
   const toggleMr = async (mr: MergeRequestItem) => {
     const nextExpanded = new Set(expandedIds);
@@ -237,15 +269,27 @@ export function MrList({
                                   </Popover.Heading>
                                   <div className="mr-ci-popover-jobs">
                                     {stage.jobs.map((job) => (
-                                      <button
-                                        key={`${stage.name}-${job.id}`}
-                                        className="mr-ci-popover-job"
-                                        type="button"
-                                        onClick={() => onOpen(job.webUrl)}
-                                      >
-                                        <span className="mr-ci-popover-job-name">{job.name}</span>
-                                        <span className="mr-ci-popover-job-status">{job.status}</span>
-                                      </button>
+                                      <div key={`${stage.name}-${job.id}`} className="mr-ci-popover-job">
+                                        <button
+                                          className="mr-ci-popover-job-link"
+                                          type="button"
+                                          onClick={() => onOpen(job.webUrl)}
+                                        >
+                                          <span className="mr-ci-popover-job-name">{job.name}</span>
+                                        </button>
+                                        <div className="mr-ci-popover-job-actions">
+                                          <span className="mr-ci-popover-job-status">{job.status}</span>
+                                          {job.status.toLowerCase() === "manual" && (
+                                            <button
+                                              className="mr-ci-run-btn"
+                                              type="button"
+                                              onClick={() => void handlePlayManualJob(mr, job.id)}
+                                            >
+                                              {runningJobIds.has(job.id) ? "Running..." : "Run"}
+                                            </button>
+                                          )}
+                                        </div>
+                                      </div>
                                     ))}
                                   </div>
                                 </Popover.Dialog>

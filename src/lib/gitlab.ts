@@ -116,6 +116,17 @@ async function fetchJson<T>(url: string, token: string, context: string): Promis
   return (await response.json()) as T;
 }
 
+async function post(url: string, token: string, context: string): Promise<void> {
+  const response = await fetchWithTimeout(url, {
+    method: "POST",
+    headers: createHeaders(token),
+  });
+
+  if (!response.ok) {
+    throw buildGitLabError(response, context);
+  }
+}
+
 export async function testGitLabConnection(settings: Settings): Promise<GitLabUser> {
   const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
   const token = settings.personalAccessToken.trim();
@@ -366,4 +377,11 @@ export async function fetchMergeRequestCiStatus(
     webUrl: latest.web_url ?? null,
     stages: groupJobsByStage(jobs),
   };
+}
+
+export async function playCiJob(settings: Settings, projectId: number, jobId: number): Promise<void> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const url = `${baseUrl}/api/v4/projects/${projectId}/jobs/${jobId}/play`;
+  await post(url, token, `Play job ${jobId}`);
 }

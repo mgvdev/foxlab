@@ -12,7 +12,7 @@ import {
   saveSettings,
 } from "./lib/store";
 import { testGitLabConnection } from "./lib/gitlab";
-import { fetchMergeRequestCiStatus, fetchMergeRequestDiscussionNotes } from "./lib/gitlab";
+import { fetchMergeRequestCiStatus, fetchMergeRequestDiscussionNotes, playCiJob } from "./lib/gitlab";
 import { DEFAULT_SETTINGS, type AppSnapshot, type MergeRequestItem, type Settings } from "./lib/types";
 import "./App.css";
 
@@ -196,6 +196,10 @@ function App() {
     (mr: MergeRequestItem) => fetchMergeRequestCiStatus(settings, mr),
     [settings],
   );
+  const handlePlayCiJob = useCallback(
+    (projectId: number, jobId: number) => playCiJob(settings, projectId, jobId),
+    [settings],
+  );
 
   const canRefresh = useMemo(() => hasValidSettings(settings), [settings]);
 
@@ -212,6 +216,7 @@ function App() {
         onOpenTicket={openItem}
         onLoadMrComments={handleLoadMrComments}
         onLoadMrCi={handleLoadMrCi}
+        onPlayCiJob={handlePlayCiJob}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}
