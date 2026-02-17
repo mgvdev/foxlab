@@ -320,10 +320,12 @@ function groupJobsByStage(jobs: MergeRequestCiJob[]) {
     stageMap.set(job.stage, current);
   }
 
-  return [...stageMap.entries()].map(([name, stageJobs]) => ({
-    name,
-    jobs: stageJobs,
-  }));
+  return [...stageMap.entries()]
+    .map(([name, stageJobs]) => ({
+      name,
+      jobs: stageJobs.sort((a, b) => a.id - b.id),
+    }))
+    .reverse();
 }
 
 export async function fetchMergeRequestCiStatus(
