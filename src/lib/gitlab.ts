@@ -2,6 +2,7 @@ import {
   COMMENT_LIMIT,
   DEFAULT_CONCURRENCY,
   type GitLabUser,
+  type MergeRequestApprover,
   type MergeRequestItem,
   type MergeRequestDiscussionNote,
   type MergeRequestCiStatus,
@@ -23,6 +24,17 @@ interface RawMergeRequest {
   state: string;
   updated_at: string;
   author?: { name?: string };
+}
+
+interface RawApprovalUser {
+  id?: number;
+  name?: string;
+  avatar_url?: string | null;
+}
+
+interface RawMergeRequestApprovals {
+  approved?: boolean;
+  approved_by?: Array<{ user?: RawApprovalUser } | RawApprovalUser>;
 }
 
 interface RawNote {
@@ -165,7 +177,49 @@ async function fetchMergeRequestsByScope(settings: Settings, scope: string): Pro
     authorName: mr.author?.name ?? "Unknown",
     updatedAt: mr.updated_at,
     state: mr.state,
+    approved: false,
+    approvedBy: [],
   }));
+}
+
+function parseApprovedByList(rawApprovals: RawMergeRequestApprovals): MergeRequestApprover[] {
+  const items = rawApprovals.approved_by ?? [];
+  const approvers: MergeRequestApprover[] = [];
+
+  for (const item of items) {
+    const wrapped = item as { user?: RawApprovalUser };
+    const user = wrapped.user ?? (item as RawApprovalUser);
+    const id = Number(user?.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      continue;
+    }
+
+    approvers.push({
+      id,
+      name: user?.name?.trim() || "Unknown",
+      avatarUrl: user?.avatar_url ?? null,
+    });
+  }
+
+  return approvers;
+}
+
+async function fetchMergeRequestApprovals(
+  settings: Settings,
+  mr: MergeRequestItem,
+): Promise<Pick<MergeRequestItem, "approved" | "approvedBy">> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/approvals`;
+  const response = await fetchJson<RawMergeRequestApprovals>(url, token, `Approvals MR !${mr.iid}`);
+  const approvedBy = parseApprovedByList(response);
+  const approved = typeof response.approved === "boolean" ? response.approved : approvedBy.length > 0;
+
+  return {
+    approved,
+    approvedBy,
+  };
 }
 
 export async function fetchTrackedMergeRequests(settings: Settings): Promise<MergeRequestItem[]> {
@@ -179,9 +233,25 @@ export async function fetchTrackedMergeRequests(settings: Settings): Promise<Mer
     byId.set(mr.id, mr);
   }
 
-  return [...byId.values()]
+  const trackedMrs = [...byId.values()]
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
     .slice(0, MR_LIMIT);
+
+  const approvals = await Promise.all(
+    trackedMrs.map(async (mr) => {
+      try {
+        return await fetchMergeRequestApprovals(settings, mr);
+      } catch {
+        return { approved: false, approvedBy: [] };
+      }
+    }),
+  );
+
+  return trackedMrs.map((mr, index) => ({
+    ...mr,
+    approved: approvals[index].approved,
+    approvedBy: approvals[index].approvedBy,
+  }));
 }
 
 async function fetchNotesForMr(settings: Settings, mr: MergeRequestItem): Promise<CommentItem[]> {

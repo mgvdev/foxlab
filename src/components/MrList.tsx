@@ -219,10 +219,70 @@ export function MrList({
         const ci = ciCache[mr.id];
         const isLoadingComments = loadingByMr[mr.id] ?? false;
         const mrError = errorByMr[mr.id];
+        const approvedBy = mr.approvedBy ?? [];
+        const isApproved = mr.approved && approvedBy.length > 0;
 
         return (
           <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
             <div className="linear-item mr-item-trigger">
+              {isApproved ? (
+                <Popover>
+                  <Popover.Trigger aria-label={`MR !${mr.iid} approved`}>
+                    <button className="mr-approval-trigger" type="button">
+                      <span className="mr-approval-notch" />
+                      <span className="mr-approval-avatars">
+                        {approvedBy.slice(0, 2).map((approver) =>
+                          approver.avatarUrl ? (
+                            <img
+                              key={`mr-${mr.id}-approver-${approver.id}`}
+                              alt={approver.name}
+                              className="comment-avatar mr-approval-avatar"
+                              src={approver.avatarUrl}
+                            />
+                          ) : (
+                            <span
+                              key={`mr-${mr.id}-approver-${approver.id}`}
+                              className="comment-avatar comment-avatar-fallback mr-approval-avatar"
+                            >
+                              {initials(approver.name)}
+                            </span>
+                          ),
+                        )}
+                        {approvedBy.length > 2 && (
+                          <span className="mr-approval-more">+{approvedBy.length - 2}</span>
+                        )}
+                      </span>
+                    </button>
+                  </Popover.Trigger>
+                  <Popover.Content className="mr-approval-popover">
+                    <Popover.Dialog>
+                      <Popover.Heading className="mr-approval-popover-title">
+                        Approved by
+                      </Popover.Heading>
+                      <div className="mr-approval-popover-list">
+                        {approvedBy.map((approver) => (
+                          <div key={`mr-${mr.id}-approver-name-${approver.id}`} className="mr-approval-user">
+                            {approver.avatarUrl ? (
+                              <img
+                                alt={approver.name}
+                                className="comment-avatar"
+                                src={approver.avatarUrl}
+                              />
+                            ) : (
+                              <span className="comment-avatar comment-avatar-fallback">
+                                {initials(approver.name)}
+                              </span>
+                            )}
+                            <span>{approver.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </Popover.Dialog>
+                  </Popover.Content>
+                </Popover>
+              ) : (
+                <span className="mr-approval-placeholder" />
+              )}
               <button className="mr-toggle-btn" type="button" onClick={() => void toggleMr(mr)}>
                 <div className="linear-item-head">
                   <div className="mr-title-wrap">

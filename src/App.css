@@ -186,6 +186,84 @@ body {
   gap: 8px;
 }
 
+.mr-approval-placeholder {
+  width: 34px;
+  flex-shrink: 0;
+}
+
+.mr-approval-trigger {
+  width: 34px;
+  flex-shrink: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.mr-approval-notch {
+  width: 4px;
+  height: 28px;
+  border-radius: 999px;
+  background: #27c56c;
+  box-shadow: 0 0 0 1px rgba(39, 197, 108, 0.18);
+}
+
+.mr-approval-avatars {
+  display: inline-flex;
+  align-items: center;
+  margin-left: -1px;
+}
+
+.mr-approval-avatar {
+  width: 14px;
+  height: 14px;
+  margin-left: -3px;
+}
+
+.mr-approval-avatar:first-child {
+  margin-left: 0;
+}
+
+.mr-approval-more {
+  margin-left: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #3fba71;
+}
+
+.mr-approval-popover {
+  min-width: 170px;
+}
+
+.mr-approval-popover-title {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #2a3e57;
+}
+
+:root[data-theme="dark"] .mr-approval-popover-title {
+  color: #c4d5ea;
+}
+
+.mr-approval-popover-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mr-approval-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: inherit;
+}
+
 .mr-toggle-btn {
   flex: 1;
   min-width: 0;

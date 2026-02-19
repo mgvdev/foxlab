@@ -19,6 +19,14 @@ export interface MergeRequestItem {
   authorName: string;
   updatedAt: string;
   state: "opened" | string;
+  approved: boolean;
+  approvedBy: MergeRequestApprover[];
+}
+
+export interface MergeRequestApprover {
+  id: number;
+  name: string;
+  avatarUrl: string | null;
 }
 
 export interface MergeRequestDiscussionNote {
