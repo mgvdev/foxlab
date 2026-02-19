@@ -1,50 +1,89 @@
 # Foxlab — GitLab Menubar Companion
 
-Application Tauri (macOS) orientée barre de menu pour suivre rapidement:
-- les Merge Requests assignées / en review,
-- les commentaires récents sur ces MRs,
-- les nouveaux commentaires via notifications.
+![Foxlab icon](./icon/icon.png)
 
-## Stack
-- Tauri v2 (Rust)
+Companion macOS orienté menubar pour suivre GitLab sans garder l’UI web ouverte en permanence.
+
+## Ce que fait l’app
+- Affiche vos MRs ouvertes (`assigned_to_me` + `reviews_for_me`).
+- Affiche les derniers commentaires des MRs suivies.
+- Affiche les tickets GitLab qui vous sont assignés.
+- Ouvre directement la MR, le commentaire, le ticket ou le pipeline dans le navigateur.
+- Notifie sur les nouveaux commentaires (hors commentaires de l’utilisateur courant).
+
+## UX principale
+- App tray-first: clic gauche sur l’icône pour afficher/masquer la popover.
+- Clic droit sur l’icône tray: menu contextuel avec action `Quitter`.
+- Fenêtre compacte always-on-top, pensée pour un usage rapide.
+- Tabs compactes:
+  - `Commentaires`
+  - `MRs`
+  - `Tickets`
+
+## Fonctionnalités clés
+- Polling GitLab configurable: `1`, `2`, `3` ou `5` minutes (défaut `2`).
+- Refresh manuel.
+- Unread sur commentaires + reset à l’ouverture de l’onglet Commentaires.
+- Accordéon MR:
+  - commentaires de discussion avec statut résolu/non résolu,
+  - état CI par stages/jobs,
+  - déclenchement des jobs CI manuels (quand GitLab le permet).
+- Masquage des MRs "bruit" (atténuées et poussées en bas de liste).
+- Labels de tickets affichés en badges colorés avec prise en compte de la hiérarchie `::`.
+- Option de préférences pour afficher/masquer les avatars dans les commentaires.
+- Thème `light` / `dark`.
+
+## Stack technique
+- Tauri v2 (Rust) + plugins:
+  - `tauri-plugin-store`
+  - `tauri-plugin-notification`
+  - `tauri-plugin-opener`
 - React 19 + TypeScript + Vite
 - HeroUI v3 beta
 - Tailwind CSS v4
 
-## Prérequis
+## Installation (dev)
+### Prérequis
 - Bun
 - Rust toolchain
 - Xcode Command Line Tools (macOS)
 
-## Lancer en local
+### Lancer en local
 ```bash
 bun install
 bun run tauri dev
 ```
 
-## Build
+### Build
 ```bash
 bun run build
 bun run tauri build
 ```
 
-## Configuration dans l'app
-Ouvre `Réglages` puis renseigne:
-- `GitLab base URL` (`https://gitlab.com` ou self-host)
-- `Personal Access Token`
-- intervalle de sync (1/2/3/5 min, défaut 2)
+## Configuration GitLab
+Dans `Réglages`, renseigner:
+- `GitLab base URL` (`https://gitlab.com` ou instance self-hosted)
+- `Personal Access Token` (scope API en lecture, et droits CI si déclenchement manuel de jobs)
+- intervalle de synchronisation
 
-Le token et l'état local (`last seen`, `last notified`) sont persistés via `tauri-plugin-store`.
+## Persistance locale
+Stocké localement via `tauri-plugin-store`:
+- `settings.gitlabBaseUrl`
+- `settings.personalAccessToken`
+- `settings.pollIntervalMinutes`
+- `settings.theme`
+- `settings.mutedMrIids`
+- `settings.showCommentAvatars`
+- `state.lastSeenCommentAt`
+- `state.lastNotifiedCommentAt`
 
-## Fonctionnalités MVP
-- Icône tray + fenêtre compacte type popover
-- Tabs `Commentaires` / `MRs`
-- Refresh manuel + polling automatique
-- Notifications macOS sur nouveaux commentaires
-- Ouverture des items GitLab dans le navigateur
-- États `loading`, `empty`, `error`
+## Notes produit / limites MVP
+- macOS menubar first (pas de mode desktop "classique" complet).
+- TLS strict (pas de bypass de certificat).
+- Pas de mode offline avancé.
+- Notifications centrées sur les nouveaux commentaires.
 
-## Limites MVP
-- TLS strict uniquement (pas de mode certif invalide)
-- Pas de mode offline avancé
-- Notifications envoyées pour tout nouveau commentaire (hors auteur courant)
+## Roadmap possible
+- Filtres avancés (groupe/projet/labels).
+- Actions MR supplémentaires (approve, assign, mark as draft).
+- Gestion plus fine des notifications par projet/type d’événement.
