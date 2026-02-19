@@ -1,3 +1,4 @@
+use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{Manager, PhysicalPosition, Position, WindowEvent};
 
@@ -47,9 +48,13 @@ pub fn run() {
             }
 
             let icon = app.default_window_icon().cloned().expect("missing app icon");
+            let tray_quit_item = MenuItem::with_id(app, "tray_quit", "Quitter", true, None::<&str>)?;
+            let tray_menu = Menu::with_items(app, &[&tray_quit_item])?;
 
             TrayIconBuilder::new()
                 .icon(icon)
+                .menu(&tray_menu)
+                .show_menu_on_left_click(false)
                 .on_tray_icon_event(|tray, event| {
                     if let TrayIconEvent::Click {
                         position,
@@ -59,6 +64,11 @@ pub fn run() {
                     } = event
                     {
                         toggle_main_window(&tray.app_handle(), Some(position));
+                    }
+                })
+                .on_menu_event(|app, event| {
+                    if event.id().as_ref() == "tray_quit" {
+                        app.exit(0);
                     }
                 })
                 .build(app)?;
