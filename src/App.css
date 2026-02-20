@@ -13,7 +13,7 @@
 
 :root[data-theme="dark"] {
   color: #e6edf3;
-  background: #07090d;
+  background: #020304;
 }
 
 html,
@@ -41,7 +41,7 @@ body {
 }
 
 :root[data-theme="dark"] .menubar-root {
-  background: #090c12;
+  background: #05070a;
   color: #e6edf3;
 }
 
@@ -71,8 +71,8 @@ body {
 }
 
 :root[data-theme="dark"] .segment-switch {
-  border-color: #1a2230;
-  background: #0f141d;
+  border-color: #151920;
+  background: #0a0d12;
 }
 
 .segment-btn {
@@ -92,7 +92,7 @@ body {
 }
 
 :root[data-theme="dark"] .segment-btn {
-  color: #8f9db2;
+  color: #949fac;
 }
 
 .segment-btn.is-active {
@@ -101,8 +101,8 @@ body {
 }
 
 :root[data-theme="dark"] .segment-btn.is-active {
-  color: #f1f6ff;
-  background: #1a2332;
+  color: #f2f5fb;
+  background: #171c24;
 }
 
 .segment-icon {
@@ -127,8 +127,8 @@ body {
 }
 
 :root[data-theme="dark"] .linear-list {
-  border-color: #1a2332;
-  background: #0d121b;
+  border-color: #151920;
+  background: #07090d;
 }
 
 .linear-item {
@@ -143,7 +143,7 @@ body {
 }
 
 :root[data-theme="dark"] .linear-item {
-  border-bottom-color: #1a2332;
+  border-bottom-color: #151920;
 }
 
 .linear-item:last-child {
@@ -155,7 +155,7 @@ body {
 }
 
 :root[data-theme="dark"] .linear-item:hover {
-  background: #131c29;
+  background: #0f131a;
 }
 
 .mr-accordion-item {
@@ -189,12 +189,13 @@ body {
 .ticket-item-row {
   border-bottom: 1px solid rgba(30, 48, 70, 0.1);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  cursor: default;
 }
 
 :root[data-theme="dark"] .ticket-item-row {
-  border-bottom-color: #1a2332;
+  border-bottom-color: #151920;
 }
 
 .ticket-main-btn {
@@ -206,6 +207,14 @@ body {
   text-align: left;
   padding: 0;
   cursor: pointer;
+}
+
+.ticket-actions {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
 }
 
 .mr-approval-placeholder {
@@ -301,10 +310,10 @@ body {
   flex-shrink: 0;
   border: 1px solid rgba(79, 105, 133, 0.35);
   border-radius: 6px;
-  height: 22px;
-  padding: 0 8px;
+  height: 24px;
+  padding: 0 9px;
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   background: rgba(109, 146, 187, 0.12);
   color: #2f4660;
   cursor: pointer;
@@ -315,19 +324,19 @@ body {
 }
 
 :root[data-theme="dark"] .mr-open-btn {
-  border-color: #2a3a53;
-  background: #162131;
-  color: #bfd0e5;
+  border-color: #2d3440;
+  background: #131821;
+  color: #e0e7f1;
 }
 
 :root[data-theme="dark"] .mr-open-btn:hover {
-  background: #1b2a3f;
+  background: #1c2330;
 }
 
 .mr-time-btn {
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 1px solid rgba(79, 105, 133, 0.35);
   border-radius: 6px;
   background: rgba(109, 146, 187, 0.12);
@@ -343,18 +352,18 @@ body {
 }
 
 .mr-time-btn-icon {
-  width: 12px;
-  height: 12px;
+  width: 13px;
+  height: 13px;
 }
 
 :root[data-theme="dark"] .mr-time-btn {
-  border-color: #2a3a53;
-  background: #162131;
-  color: #bfd0e5;
+  border-color: #2d3440;
+  background: #131821;
+  color: #e0e7f1;
 }
 
 :root[data-theme="dark"] .mr-time-btn:hover {
-  background: #1b2a3f;
+  background: #1c2330;
 }
 
 .mr-more-btn {
@@ -375,13 +384,13 @@ body {
 }
 
 :root[data-theme="dark"] .mr-more-btn {
-  border-color: #2a3a53;
-  background: #162131;
-  color: #bfd0e5;
+  border-color: #2d3440;
+  background: #131821;
+  color: #e0e7f1;
 }
 
 :root[data-theme="dark"] .mr-more-btn:hover {
-  background: #1b2a3f;
+  background: #1c2330;
 }
 
 .mr-time-popover {
@@ -422,13 +431,13 @@ body {
 }
 
 :root[data-theme="dark"] .mr-time-quick-btn {
-  border-color: #2a3a53;
-  background: #162131;
-  color: #bfd0e5;
+  border-color: #2d3440;
+  background: #131821;
+  color: #e0e7f1;
 }
 
 :root[data-theme="dark"] .mr-time-quick-btn:hover:not(:disabled) {
-  background: #1b2a3f;
+  background: #1c2330;
 }
 
 .mr-time-input-row {
@@ -455,8 +464,8 @@ body {
 }
 
 :root[data-theme="dark"] .mr-time-input {
-  border-color: #2a3a53;
-  background: #111b2a;
+  border-color: #2d3440;
+  background: #0d1219;
 }
 
 .mr-time-submit-btn {
@@ -482,13 +491,13 @@ body {
 }
 
 :root[data-theme="dark"] .mr-time-submit-btn {
-  border-color: #2a3a53;
-  background: #162131;
-  color: #bfd0e5;
+  border-color: #2d3440;
+  background: #131821;
+  color: #e0e7f1;
 }
 
 :root[data-theme="dark"] .mr-time-submit-btn:hover:not(:disabled) {
-  background: #1b2a3f;
+  background: #1c2330;
 }
 
 .mr-time-error {
