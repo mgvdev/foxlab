@@ -26,6 +26,7 @@ interface TrayPopoverProps {
   onLoadMrComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadMrCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
+  onAddMrSpentTime: (mr: MergeRequestItem, duration: string) => Promise<void>;
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
   showCommentAvatars: boolean;
@@ -74,6 +75,7 @@ export function TrayPopover({
   onLoadMrComments,
   onLoadMrCi,
   onPlayCiJob,
+  onAddMrSpentTime,
   mutedMrIids,
   onToggleMuteMrIid,
   showCommentAvatars,
@@ -157,6 +159,7 @@ export function TrayPopover({
             onLoadCi={onLoadMrCi}
             onLoadComments={onLoadMrComments}
             onPlayCiJob={onPlayCiJob}
+            onAddSpentTime={onAddMrSpentTime}
             mutedMrIids={mutedMrIids}
             onToggleMuteMrIid={onToggleMuteMrIid}
             showAvatars={showCommentAvatars}

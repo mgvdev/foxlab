@@ -21,12 +21,23 @@ export interface MergeRequestItem {
   state: "opened" | string;
   approved: boolean;
   approvedBy: MergeRequestApprover[];
+  timeEstimateSeconds: number;
+  totalTimeSpentSeconds: number;
+  humanTimeEstimate: string;
+  humanTotalTimeSpent: string;
 }
 
 export interface MergeRequestApprover {
   id: number;
   name: string;
   avatarUrl: string | null;
+}
+
+export interface MergeRequestTimeStats {
+  timeEstimateSeconds: number;
+  totalTimeSpentSeconds: number;
+  humanTimeEstimate: string;
+  humanTotalTimeSpent: string;
 }
 
 export interface MergeRequestDiscussionNote {

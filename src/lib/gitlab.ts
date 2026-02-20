@@ -7,6 +7,7 @@ import {
   type MergeRequestDiscussionNote,
   type MergeRequestCiStatus,
   type MergeRequestCiJob,
+  type MergeRequestTimeStats,
   MR_LIMIT,
   NOTES_PER_MR_LIMIT,
   REQUEST_TIMEOUT_MS,
@@ -35,6 +36,13 @@ interface RawApprovalUser {
 interface RawMergeRequestApprovals {
   approved?: boolean;
   approved_by?: Array<{ user?: RawApprovalUser } | RawApprovalUser>;
+}
+
+interface RawMergeRequestTimeStats {
+  time_estimate?: number;
+  total_time_spent?: number;
+  human_time_estimate?: string;
+  human_total_time_spent?: string;
 }
 
 interface RawNote {
@@ -139,6 +147,24 @@ async function post(url: string, token: string, context: string): Promise<void> 
   }
 }
 
+function emptyTimeStats(): MergeRequestTimeStats {
+  return {
+    timeEstimateSeconds: 0,
+    totalTimeSpentSeconds: 0,
+    humanTimeEstimate: "0m",
+    humanTotalTimeSpent: "0m",
+  };
+}
+
+function mapTimeStats(raw: RawMergeRequestTimeStats): MergeRequestTimeStats {
+  return {
+    timeEstimateSeconds: Number(raw.time_estimate) || 0,
+    totalTimeSpentSeconds: Number(raw.total_time_spent) || 0,
+    humanTimeEstimate: raw.human_time_estimate?.trim() || "0m",
+    humanTotalTimeSpent: raw.human_total_time_spent?.trim() || "0m",
+  };
+}
+
 export async function testGitLabConnection(settings: Settings): Promise<GitLabUser> {
   const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
   const token = settings.personalAccessToken.trim();
@@ -179,6 +205,7 @@ async function fetchMergeRequestsByScope(settings: Settings, scope: string): Pro
     state: mr.state,
     approved: false,
     approvedBy: [],
+    ...emptyTimeStats(),
   }));
 }
 
@@ -222,6 +249,57 @@ async function fetchMergeRequestApprovals(
   };
 }
 
+export async function fetchMergeRequestTimeStats(
+  settings: Settings,
+  mr: MergeRequestItem,
+): Promise<MergeRequestTimeStats> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/time_stats`;
+  const rawStats = await fetchJson<RawMergeRequestTimeStats>(url, token, `Time stats MR !${mr.iid}`);
+  return mapTimeStats(rawStats);
+}
+
+export async function addMergeRequestSpentTime(
+  settings: Settings,
+  mr: MergeRequestItem,
+  duration: string,
+): Promise<void> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const normalizedDuration = duration.trim();
+
+  if (!normalizedDuration) {
+    throw new Error("Durée requise (ex: 30m, 1h 20m)");
+  }
+
+  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/add_spent_time`;
+  const form = new URLSearchParams({ duration: normalizedDuration });
+
+  const response = await fetchWithTimeout(url, {
+    method: "POST",
+    headers: {
+      "PRIVATE-TOKEN": token,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: form.toString(),
+  });
+
+  if (response.ok) {
+    return;
+  }
+
+  if (response.status === 400) {
+    throw new Error("Format de durée invalide. Exemples: 30m, 1h, 1h 20m.");
+  }
+
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
+    throw new Error("Impossible d'ajouter le temps (permissions insuffisantes ou MR inaccessible).");
+  }
+
+  throw buildGitLabError(response, `Ajout temps MR !${mr.iid}`);
+}
+
 export async function fetchTrackedMergeRequests(settings: Settings): Promise<MergeRequestItem[]> {
   const [assigned, reviews] = await Promise.all([
     fetchMergeRequestsByScope(settings, "assigned_to_me"),
@@ -237,21 +315,53 @@ export async function fetchTrackedMergeRequests(settings: Settings): Promise<Mer
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt))
     .slice(0, MR_LIMIT);
 
-  const approvals = await Promise.all(
-    trackedMrs.map(async (mr) => {
-      try {
-        return await fetchMergeRequestApprovals(settings, mr);
-      } catch {
-        return { approved: false, approvedBy: [] };
-      }
-    }),
-  );
+  const enrichments = await mapWithConcurrency(trackedMrs, DEFAULT_CONCURRENCY, async (mr) => {
+    const [approvals, timeStats] = await Promise.all([
+      fetchMergeRequestApprovals(settings, mr).catch(() => ({ approved: false, approvedBy: [] })),
+      fetchMergeRequestTimeStats(settings, mr).catch(() => emptyTimeStats()),
+    ]);
+
+    return {
+      ...approvals,
+      ...timeStats,
+    };
+  });
 
   return trackedMrs.map((mr, index) => ({
     ...mr,
-    approved: approvals[index].approved,
-    approvedBy: approvals[index].approvedBy,
+    approved: enrichments[index].approved,
+    approvedBy: enrichments[index].approvedBy,
+    timeEstimateSeconds: enrichments[index].timeEstimateSeconds,
+    totalTimeSpentSeconds: enrichments[index].totalTimeSpentSeconds,
+    humanTimeEstimate: enrichments[index].humanTimeEstimate,
+    humanTotalTimeSpent: enrichments[index].humanTotalTimeSpent,
   }));
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  mapper: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const maxWorkers = Math.max(1, limit);
+  const results = new Array<R>(items.length);
+  let index = 0;
+
+  const workers = Array.from({ length: maxWorkers }, async () => {
+    while (true) {
+      const currentIndex = index;
+      index += 1;
+
+      if (currentIndex >= items.length) {
+        return;
+      }
+
+      results[currentIndex] = await mapper(items[currentIndex]);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
 }
 
 async function fetchNotesForMr(settings: Settings, mr: MergeRequestItem): Promise<CommentItem[]> {
@@ -279,30 +389,6 @@ async function fetchNotesForMr(settings: Settings, mr: MergeRequestItem): Promis
       webUrl: `${mr.webUrl}#note_${note.id}`,
       key: `${mr.projectId}:${mr.iid}:${note.id}`,
     }));
-}
-
-async function mapWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  mapper: (item: T) => Promise<R>,
-): Promise<R[]> {
-  const results: R[] = [];
-  const queue = [...items];
-
-  const workers = Array.from({ length: Math.max(1, limit) }, async () => {
-    while (queue.length > 0) {
-      const next = queue.shift();
-      if (!next) {
-        return;
-      }
-
-      const value = await mapper(next);
-      results.push(value);
-    }
-  });
-
-  await Promise.all(workers);
-  return results;
 }
 
 export async function fetchRecentComments(

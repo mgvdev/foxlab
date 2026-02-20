@@ -302,6 +302,39 @@ body {
   background: #1b2a3f;
 }
 
+.mr-time-btn {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 6px;
+  background: rgba(109, 146, 187, 0.12);
+  color: #2f4660;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mr-time-btn:hover {
+  background: rgba(109, 146, 187, 0.2);
+}
+
+.mr-time-btn-icon {
+  width: 12px;
+  height: 12px;
+}
+
+:root[data-theme="dark"] .mr-time-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-time-btn:hover {
+  background: #1b2a3f;
+}
+
 .mr-more-btn {
   flex-shrink: 0;
   width: 22px;
@@ -327,6 +360,119 @@ body {
 
 :root[data-theme="dark"] .mr-more-btn:hover {
   background: #1b2a3f;
+}
+
+.mr-time-popover {
+  width: 220px;
+}
+
+.mr-time-popover-title {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mr-time-quick-actions {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 7px;
+}
+
+.mr-time-quick-btn {
+  flex: 1;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 7px;
+  height: 24px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(109, 146, 187, 0.12);
+  color: #2f4660;
+  cursor: pointer;
+}
+
+.mr-time-quick-btn:hover:not(:disabled) {
+  background: rgba(109, 146, 187, 0.2);
+}
+
+.mr-time-quick-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+:root[data-theme="dark"] .mr-time-quick-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-time-quick-btn:hover:not(:disabled) {
+  background: #1b2a3f;
+}
+
+.mr-time-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mr-time-input {
+  min-width: 0;
+  flex: 1;
+  height: 26px;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 7px;
+  padding: 0 8px;
+  background: rgba(138, 160, 184, 0.08);
+  color: inherit;
+  font-size: 11px;
+}
+
+.mr-time-input:focus {
+  outline: none;
+  border-color: #5c87b8;
+}
+
+:root[data-theme="dark"] .mr-time-input {
+  border-color: #2a3a53;
+  background: #111b2a;
+}
+
+.mr-time-submit-btn {
+  flex-shrink: 0;
+  height: 26px;
+  border: 1px solid rgba(79, 105, 133, 0.35);
+  border-radius: 7px;
+  padding: 0 8px;
+  background: rgba(93, 137, 190, 0.16);
+  color: #32506e;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mr-time-submit-btn:hover:not(:disabled) {
+  background: rgba(93, 137, 190, 0.24);
+}
+
+.mr-time-submit-btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+:root[data-theme="dark"] .mr-time-submit-btn {
+  border-color: #2a3a53;
+  background: #162131;
+  color: #bfd0e5;
+}
+
+:root[data-theme="dark"] .mr-time-submit-btn:hover:not(:disabled) {
+  background: #1b2a3f;
+}
+
+.mr-time-error {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: #ce4353;
 }
 
 .mr-row-menu {
@@ -445,6 +591,73 @@ body {
 
 :root[data-theme="dark"] .linear-item-body {
   color: #9caac0;
+}
+
+.mr-time-row {
+  margin-top: 5px;
+}
+
+.mr-time-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #63758d;
+}
+
+:root[data-theme="dark"] .mr-time-meta {
+  color: #95a8bf;
+}
+
+.mr-time-overrun {
+  margin-left: 4px;
+  border-radius: 999px;
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 700;
+  color: #ad3041;
+  background: rgba(205, 76, 95, 0.16);
+}
+
+:root[data-theme="dark"] .mr-time-overrun {
+  color: #f1a7b2;
+  background: rgba(191, 65, 84, 0.32);
+}
+
+.mr-time-bar {
+  margin-top: 4px;
+  width: 100%;
+  max-width: 180px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(106, 132, 162, 0.22);
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .mr-time-bar {
+  background: #162438;
+}
+
+.mr-time-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #42c67a 0%, #6ed997 100%);
+}
+
+.mr-time-fill-overrun {
+  background: linear-gradient(90deg, #d55d6f 0%, #f18da0 100%);
+}
+
+.mr-time-no-estimate {
+  background: rgba(127, 140, 160, 0.28);
+}
+
+:root[data-theme="dark"] .mr-time-no-estimate {
+  background: #1c2636;
+}
+
+.mr-time-no-estimate .mr-time-fill {
+  background: linear-gradient(90deg, #7c8b9d 0%, #95a4b7 100%);
 }
 
 .mr-head-meta {

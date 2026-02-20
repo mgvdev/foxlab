@@ -12,7 +12,13 @@ import {
   saveSettings,
 } from "./lib/store";
 import { testGitLabConnection } from "./lib/gitlab";
-import { fetchMergeRequestCiStatus, fetchMergeRequestDiscussionNotes, playCiJob } from "./lib/gitlab";
+import {
+  addMergeRequestSpentTime,
+  fetchMergeRequestCiStatus,
+  fetchMergeRequestDiscussionNotes,
+  fetchMergeRequestTimeStats,
+  playCiJob,
+} from "./lib/gitlab";
 import { DEFAULT_SETTINGS, type AppSnapshot, type MergeRequestItem, type Settings } from "./lib/types";
 import "./App.css";
 
@@ -200,6 +206,33 @@ function App() {
     (projectId: number, jobId: number) => playCiJob(settings, projectId, jobId),
     [settings],
   );
+  const handleAddMrSpentTime = useCallback(
+    async (mr: MergeRequestItem, duration: string) => {
+      try {
+        await addMergeRequestSpentTime(settings, mr, duration);
+        const refreshedStats = await fetchMergeRequestTimeStats(settings, mr);
+
+        setSnapshot((current) => ({
+          ...current,
+          mrs: current.mrs.map((candidate) =>
+            candidate.id === mr.id ? { ...candidate, ...refreshedStats } : candidate,
+          ),
+          error: null,
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Impossible d'ajouter le temps passé";
+
+        setSnapshot((current) => ({
+          ...current,
+          error: message,
+        }));
+
+        throw new Error(message);
+      }
+    },
+    [settings],
+  );
   const handleToggleMuteMrIid = useCallback((iid: number) => {
     setSettings((current) => {
       const muted = current.mutedMrIids.includes(iid);
@@ -238,6 +271,7 @@ function App() {
         onLoadMrComments={handleLoadMrComments}
         onLoadMrCi={handleLoadMrCi}
         onPlayCiJob={handlePlayCiJob}
+        onAddMrSpentTime={handleAddMrSpentTime}
         mutedMrIids={settings.mutedMrIids}
         onToggleMuteMrIid={handleToggleMuteMrIid}
         showCommentAvatars={settings.showCommentAvatars}
