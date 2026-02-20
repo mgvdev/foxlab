@@ -268,6 +268,11 @@ body {
   border-top-color: #131821;
 }
 
+.ticket-time-inline {
+  margin-top: 6px;
+  padding-bottom: 2px;
+}
+
 .mr-approval-placeholder {
   width: 34px;
   flex-shrink: 0;
