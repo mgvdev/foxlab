@@ -219,11 +219,31 @@ export function TicketList({
 
         return (
           <div key={ticket.id} className="linear-item ticket-item-row">
-            <button className="ticket-toggle-btn" type="button" onClick={() => toggleTicket(ticket.id)}>
+            <div
+              className="ticket-toggle-btn"
+              role="button"
+              tabIndex={0}
+              onClick={() => toggleTicket(ticket.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggleTicket(ticket.id);
+                }
+              }}
+            >
               <div className="linear-item-head">
                 <Tooltip delay={150}>
                   <Tooltip.Trigger aria-label={`Ticket #${ticket.iid}`}>
-                    <span className="linear-item-title">#{ticket.iid} · {ticket.title}</span>
+                    <button
+                      className="ticket-title-btn"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onOpen(ticket.webUrl);
+                      }}
+                    >
+                      #{ticket.iid} · {ticket.title}
+                    </button>
                   </Tooltip.Trigger>
                   <Tooltip.Content showArrow>
                     <Tooltip.Arrow />
@@ -259,7 +279,7 @@ export function TicketList({
                   />
                 </div>
               </div>
-            </button>
+            </div>
             {expandedTicketIds.has(ticket.id) && (
               <div className="ticket-accordion-panel">
                 <div className="ticket-actions">
