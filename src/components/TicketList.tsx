@@ -151,6 +151,20 @@ export function TicketList({
     }
   };
 
+  const progressColor = (ratio: number, isOverrun: boolean, hasEstimate: boolean): string => {
+    if (!hasEstimate) {
+      return "#7c8b9d";
+    }
+
+    if (isOverrun) {
+      return "#d55d6f";
+    }
+
+    const safeRatio = Math.max(0, Math.min(1, ratio));
+    const hue = 5 + safeRatio * 120;
+    return `hsl(${hue} 70% 52%)`;
+  };
+
   const toggleTicket = (ticketId: number) => {
     setExpandedTicketIds((current) => {
       const next = new Set(current);
@@ -193,15 +207,15 @@ export function TicketList({
       {tickets.map((ticket) => {
         const hasEstimate = ticket.timeEstimateSeconds > 0;
         const estimateLabel = hasEstimate ? ticket.humanTimeEstimate : "No estimate";
-        const progressPercent = hasEstimate
-          ? Math.min(100, (ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds) * 100)
-          : 0;
+        const rawRatio = hasEstimate ? ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds : 0;
+        const progressPercent = hasEstimate ? Math.min(100, rawRatio * 100) : 0;
         const isOverrun = hasEstimate && ticket.totalTimeSpentSeconds > ticket.timeEstimateSeconds;
         const isSubmittingTime = timeSubmittingByTicket[ticket.id] ?? false;
         const isSubmittingEstimate = estimateSubmittingByTicket[ticket.id] ?? false;
         const timeInput = timeInputByTicket[ticket.id] ?? "";
         const estimateInput = estimateInputByTicket[ticket.id] ?? "";
         const timeError = timeErrorByTicket[ticket.id];
+        const fillColor = progressColor(rawRatio, isOverrun, hasEstimate);
 
         return (
           <div key={ticket.id} className="linear-item ticket-item-row">
@@ -228,23 +242,26 @@ export function TicketList({
                   ticket.labels.map((label) => renderLabel(label, `${ticket.id}-${label}`))
                 )}
               </div>
+              <div className="mr-time-row">
+                <div className="mr-time-meta">
+                  <span>Spent {ticket.humanTotalTimeSpent || "0m"}</span>
+                  <span>/</span>
+                  <span>Est. {estimateLabel}</span>
+                  {isOverrun && <span className="mr-time-overrun">Overrun</span>}
+                </div>
+                <div className={`mr-time-bar ${hasEstimate ? "" : "mr-time-no-estimate"}`}>
+                  <div
+                    className="mr-time-fill"
+                    style={{
+                      width: hasEstimate ? `${progressPercent}%` : "34%",
+                      background: fillColor,
+                    }}
+                  />
+                </div>
+              </div>
             </button>
             {expandedTicketIds.has(ticket.id) && (
               <div className="ticket-accordion-panel">
-                <div className="mr-time-row">
-                  <div className="mr-time-meta">
-                    <span>Spent {ticket.humanTotalTimeSpent || "0m"}</span>
-                    <span>/</span>
-                    <span>Est. {estimateLabel}</span>
-                    {isOverrun && <span className="mr-time-overrun">Overrun</span>}
-                  </div>
-                  <div className={`mr-time-bar ${hasEstimate ? "" : "mr-time-no-estimate"}`}>
-                    <div
-                      className={`mr-time-fill ${isOverrun ? "mr-time-fill-overrun" : ""}`}
-                      style={{ width: hasEstimate ? `${progressPercent}%` : "34%" }}
-                    />
-                  </div>
-                </div>
                 <div className="ticket-actions">
                   <button className="mr-open-btn" type="button" onClick={() => onOpen(ticket.webUrl)}>
                     Open

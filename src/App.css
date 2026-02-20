@@ -41,7 +41,7 @@ body {
 }
 
 :root[data-theme="dark"] .menubar-root {
-  background: #05070a;
+  background: #020305;
   color: #e6edf3;
 }
 
@@ -127,8 +127,8 @@ body {
 }
 
 :root[data-theme="dark"] .linear-list {
-  border-color: #151920;
-  background: #07090d;
+  border-color: #242b37;
+  background: #0c1017;
 }
 
 .linear-item {
@@ -143,7 +143,8 @@ body {
 }
 
 :root[data-theme="dark"] .linear-item {
-  border-bottom-color: #151920;
+  border-bottom-color: #232a35;
+  background: rgba(255, 255, 255, 0.015);
 }
 
 .linear-item:last-child {
@@ -155,7 +156,7 @@ body {
 }
 
 :root[data-theme="dark"] .linear-item:hover {
-  background: #0f131a;
+  background: #151b25;
 }
 
 .mr-accordion-item {
@@ -673,7 +674,7 @@ body {
   margin-top: 4px;
   width: 100%;
   max-width: 180px;
-  height: 5px;
+  height: 3px;
   border-radius: 999px;
   background: rgba(106, 132, 162, 0.22);
   overflow: hidden;
@@ -686,7 +687,7 @@ body {
 .mr-time-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #42c67a 0%, #6ed997 100%);
+  background: #7c8b9d;
 }
 
 .mr-time-fill-overrun {
@@ -702,7 +703,7 @@ body {
 }
 
 .mr-time-no-estimate .mr-time-fill {
-  background: linear-gradient(90deg, #7c8b9d 0%, #95a4b7 100%);
+  background: #7c8b9d;
 }
 
 .mr-head-meta {
