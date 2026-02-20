@@ -188,9 +188,7 @@ body {
 
 .ticket-item-row {
   border-bottom: 1px solid rgba(30, 48, 70, 0.1);
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  display: block;
   cursor: default;
 }
 
@@ -198,8 +196,8 @@ body {
   border-bottom-color: #151920;
 }
 
-.ticket-main-btn {
-  flex: 1;
+.ticket-toggle-btn {
+  width: 100%;
   min-width: 0;
   border: 0;
   background: transparent;
@@ -210,11 +208,27 @@ body {
 }
 
 .ticket-actions {
-  flex-shrink: 0;
+  width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 1px;
+  margin-top: 7px;
+}
+
+.ticket-head-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-accordion-panel {
+  margin-top: 7px;
+  padding: 7px 8px 0;
+  border-top: 1px solid rgba(30, 48, 70, 0.08);
+}
+
+:root[data-theme="dark"] .ticket-accordion-panel {
+  border-top-color: #131821;
 }
 
 .mr-approval-placeholder {

@@ -84,6 +84,7 @@ export function TicketList({
   onAddSpentTime,
   onSetEstimate,
 }: TicketListProps) {
+  const [expandedTicketIds, setExpandedTicketIds] = useState<Set<number>>(new Set());
   const [timeInputByTicket, setTimeInputByTicket] = useState<Record<number, string>>({});
   const [estimateInputByTicket, setEstimateInputByTicket] = useState<Record<number, string>>({});
   const [timeSubmittingByTicket, setTimeSubmittingByTicket] = useState<Record<number, boolean>>({});
@@ -150,6 +151,18 @@ export function TicketList({
     }
   };
 
+  const toggleTicket = (ticketId: number) => {
+    setExpandedTicketIds((current) => {
+      const next = new Set(current);
+      if (next.has(ticketId)) {
+        next.delete(ticketId);
+      } else {
+        next.add(ticketId);
+      }
+      return next;
+    });
+  };
+
   if (loading) {
     return <LoadingState />;
   }
@@ -192,7 +205,7 @@ export function TicketList({
 
         return (
           <div key={ticket.id} className="linear-item ticket-item-row">
-            <button className="ticket-main-btn" type="button" onClick={() => onOpen(ticket.webUrl)}>
+            <button className="ticket-toggle-btn" type="button" onClick={() => toggleTicket(ticket.id)}>
               <div className="linear-item-head">
                 <Tooltip delay={150}>
                   <Tooltip.Trigger aria-label={`Ticket #${ticket.iid}`}>
@@ -203,21 +216,10 @@ export function TicketList({
                     <span>#{ticket.iid} · {ticket.title}</span>
                   </Tooltip.Content>
                 </Tooltip>
-                <span className="linear-item-meta">{formatRelativeTime(ticket.updatedAt)}</span>
-              </div>
-              <div className="mr-time-row">
-                <div className="mr-time-meta">
-                  <span>Spent {ticket.humanTotalTimeSpent || "0m"}</span>
-                  <span>/</span>
-                  <span>Est. {estimateLabel}</span>
-                  {isOverrun && <span className="mr-time-overrun">Overrun</span>}
-                </div>
-                <div className={`mr-time-bar ${hasEstimate ? "" : "mr-time-no-estimate"}`}>
-                  <div
-                    className={`mr-time-fill ${isOverrun ? "mr-time-fill-overrun" : ""}`}
-                    style={{ width: hasEstimate ? `${progressPercent}%` : "34%" }}
-                  />
-                </div>
+                <span className="linear-item-meta ticket-head-meta">
+                  <span>{formatRelativeTime(ticket.updatedAt)}</span>
+                  <span className={`mr-arrow ${expandedTicketIds.has(ticket.id) ? "is-open" : ""}`}>▾</span>
+                </span>
               </div>
               <div className="linear-labels">
                 {ticket.labels.length === 0 ? (
@@ -227,89 +229,107 @@ export function TicketList({
                 )}
               </div>
             </button>
-            <div className="ticket-actions">
-              <button className="mr-open-btn" type="button" onClick={() => onOpen(ticket.webUrl)}>
-                Open
-              </button>
-              <Popover>
-                <Popover.Trigger aria-label={`Ajouter du temps sur ticket #${ticket.iid}`}>
-                  <button className="mr-time-btn" type="button">
-                    <svg className="mr-time-btn-icon" viewBox="0 0 20 20" aria-hidden="true">
-                      <circle cx="9" cy="11" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                      <path d="M9 8.6v2.9l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M14.7 3.8v4.2M12.6 5.9h4.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
+            {expandedTicketIds.has(ticket.id) && (
+              <div className="ticket-accordion-panel">
+                <div className="mr-time-row">
+                  <div className="mr-time-meta">
+                    <span>Spent {ticket.humanTotalTimeSpent || "0m"}</span>
+                    <span>/</span>
+                    <span>Est. {estimateLabel}</span>
+                    {isOverrun && <span className="mr-time-overrun">Overrun</span>}
+                  </div>
+                  <div className={`mr-time-bar ${hasEstimate ? "" : "mr-time-no-estimate"}`}>
+                    <div
+                      className={`mr-time-fill ${isOverrun ? "mr-time-fill-overrun" : ""}`}
+                      style={{ width: hasEstimate ? `${progressPercent}%` : "34%" }}
+                    />
+                  </div>
+                </div>
+                <div className="ticket-actions">
+                  <button className="mr-open-btn" type="button" onClick={() => onOpen(ticket.webUrl)}>
+                    Open
                   </button>
-                </Popover.Trigger>
-                <Popover.Content className="mr-time-popover">
-                  <Popover.Dialog>
-                    <Popover.Heading className="mr-time-popover-title">
-                      Time tracking
-                    </Popover.Heading>
-                    <div className="mr-time-quick-actions">
-                      {["15m", "30m", "1h"].map((preset) => (
-                        <button
-                          key={`${ticket.id}-${preset}`}
-                          className="mr-time-quick-btn"
-                          disabled={isSubmittingTime || isSubmittingEstimate}
-                          type="button"
-                          onClick={() => void handleAddSpentTime(ticket, preset)}
-                        >
-                          +{preset}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mr-time-input-row">
-                      <input
-                        className="mr-time-input"
-                        disabled={isSubmittingTime || isSubmittingEstimate}
-                        placeholder="spent: ex 1h 20m"
-                        type="text"
-                        value={timeInput}
-                        onChange={(event) =>
-                          setTimeInputByTicket((current) => ({
-                            ...current,
-                            [ticket.id]: event.currentTarget.value,
-                          }))
-                        }
-                      />
-                      <button
-                        className="mr-time-submit-btn"
-                        disabled={isSubmittingTime || isSubmittingEstimate}
-                        type="button"
-                        onClick={() => void handleAddSpentTime(ticket, timeInput)}
-                      >
-                        {isSubmittingTime ? "..." : "Add"}
+                  <Popover>
+                    <Popover.Trigger aria-label={`Ajouter du temps sur ticket #${ticket.iid}`}>
+                      <button className="mr-time-btn" type="button">
+                        <svg className="mr-time-btn-icon" viewBox="0 0 20 20" aria-hidden="true">
+                          <circle cx="9" cy="11" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                          <path d="M9 8.6v2.9l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M14.7 3.8v4.2M12.6 5.9h4.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
                       </button>
-                    </div>
-                    <div className="mr-time-input-row">
-                      <input
-                        className="mr-time-input"
-                        disabled={isSubmittingTime || isSubmittingEstimate}
-                        placeholder="estimate: ex 2h"
-                        type="text"
-                        value={estimateInput}
-                        onChange={(event) =>
-                          setEstimateInputByTicket((current) => ({
-                            ...current,
-                            [ticket.id]: event.currentTarget.value,
-                          }))
-                        }
-                      />
-                      <button
-                        className="mr-time-submit-btn"
-                        disabled={isSubmittingTime || isSubmittingEstimate}
-                        type="button"
-                        onClick={() => void handleSetEstimate(ticket, estimateInput)}
-                      >
-                        {isSubmittingEstimate ? "..." : "Set est."}
-                      </button>
-                    </div>
-                    {timeError && <p className="mr-time-error">{timeError}</p>}
-                  </Popover.Dialog>
-                </Popover.Content>
-              </Popover>
-            </div>
+                    </Popover.Trigger>
+                    <Popover.Content className="mr-time-popover">
+                      <Popover.Dialog>
+                        <Popover.Heading className="mr-time-popover-title">
+                          Time tracking
+                        </Popover.Heading>
+                        <div className="mr-time-quick-actions">
+                          {["15m", "30m", "1h"].map((preset) => (
+                            <button
+                              key={`${ticket.id}-${preset}`}
+                              className="mr-time-quick-btn"
+                              disabled={isSubmittingTime || isSubmittingEstimate}
+                              type="button"
+                              onClick={() => void handleAddSpentTime(ticket, preset)}
+                            >
+                              +{preset}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mr-time-input-row">
+                          <input
+                            className="mr-time-input"
+                            disabled={isSubmittingTime || isSubmittingEstimate}
+                            placeholder="spent: ex 1h 20m"
+                            type="text"
+                            value={timeInput}
+                            onChange={(event) =>
+                              setTimeInputByTicket((current) => ({
+                                ...current,
+                                [ticket.id]: event.currentTarget.value,
+                              }))
+                            }
+                          />
+                          <button
+                            className="mr-time-submit-btn"
+                            disabled={isSubmittingTime || isSubmittingEstimate}
+                            type="button"
+                            onClick={() => void handleAddSpentTime(ticket, timeInput)}
+                          >
+                            {isSubmittingTime ? "..." : "Add"}
+                          </button>
+                        </div>
+                        <div className="mr-time-input-row">
+                          <input
+                            className="mr-time-input"
+                            disabled={isSubmittingTime || isSubmittingEstimate}
+                            placeholder="estimate: ex 2h"
+                            type="text"
+                            value={estimateInput}
+                            onChange={(event) =>
+                              setEstimateInputByTicket((current) => ({
+                                ...current,
+                                [ticket.id]: event.currentTarget.value,
+                              }))
+                            }
+                          />
+                          <button
+                            className="mr-time-submit-btn"
+                            disabled={isSubmittingTime || isSubmittingEstimate}
+                            type="button"
+                            onClick={() => void handleSetEstimate(ticket, estimateInput)}
+                          >
+                            {isSubmittingEstimate ? "..." : "Set est."}
+                          </button>
+                        </div>
+                        {timeError && <p className="mr-time-error">{timeError}</p>}
+                      </Popover.Dialog>
+                    </Popover.Content>
+                  </Popover>
+                </div>
+              </div>
+            )}
           </div>
         );
       })}
