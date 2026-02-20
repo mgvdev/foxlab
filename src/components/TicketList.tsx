@@ -219,7 +219,18 @@ export function TicketList({
 
         return (
           <div key={ticket.id} className="linear-item ticket-item-row">
-            <div className="ticket-toggle-btn">
+            <div
+              className="ticket-toggle-btn"
+              role="button"
+              tabIndex={0}
+              onClick={() => toggleTicket(ticket.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  toggleTicket(ticket.id);
+                }
+              }}
+            >
               <div className="linear-item-head">
                 <button
                   className="ticket-title-btn"
@@ -232,16 +243,10 @@ export function TicketList({
                 >
                   #{ticket.iid} · {ticket.title}
                 </button>
-                <button
-                  className="ticket-expand-btn"
-                  type="button"
-                  onClick={() => toggleTicket(ticket.id)}
-                >
-                  <span className="linear-item-meta ticket-head-meta">
-                    <span>{formatRelativeTime(ticket.updatedAt)}</span>
-                    <span className={`mr-arrow ${expandedTicketIds.has(ticket.id) ? "is-open" : ""}`}>▾</span>
-                  </span>
-                </button>
+                <span className="linear-item-meta ticket-head-meta">
+                  <span>{formatRelativeTime(ticket.updatedAt)}</span>
+                  <span className={`mr-arrow ${expandedTicketIds.has(ticket.id) ? "is-open" : ""}`}>▾</span>
+                </span>
               </div>
               <div className="linear-labels">
                 {ticket.labels.length === 0 ? (
