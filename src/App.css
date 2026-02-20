@@ -1048,9 +1048,6 @@ body {
 }
 
 .ticket-item-row .linear-labels {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
   width: 100%;
 }
 
@@ -1064,12 +1061,6 @@ body {
   font-weight: 600;
   color: #425468;
   background: rgba(138, 157, 177, 0.2);
-}
-
-.ticket-item-row .linear-label {
-  width: 100%;
-  min-width: 0;
-  justify-content: center;
 }
 
 :root[data-theme="dark"] .linear-label {
@@ -1096,8 +1087,8 @@ body {
 }
 
 .ticket-item-row .scoped-label {
-  width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .scoped-label-scope {
@@ -1108,30 +1099,12 @@ body {
   background: var(--scope-bg);
 }
 
-.ticket-item-row .scoped-label-scope {
-  flex: 0 0 46%;
-  min-width: 0;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .scoped-label-value {
   padding: 1px 7px;
   font-size: 10px;
   font-weight: 700;
   color: var(--value-fg);
   background: var(--value-bg);
-}
-
-.ticket-item-row .scoped-label-value {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .settings-hint {

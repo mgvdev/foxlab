@@ -223,9 +223,7 @@ export function TicketList({
                 {ticket.labels.length === 0 ? (
                   <span className="linear-label linear-label--empty">No label</span>
                 ) : (
-                  ticket.labels
-                    .slice(0, 4)
-                    .map((label) => renderLabel(label, `${ticket.id}-${label}`))
+                  ticket.labels.map((label) => renderLabel(label, `${ticket.id}-${label}`))
                 )}
               </div>
             </button>
