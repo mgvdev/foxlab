@@ -13,13 +13,20 @@ import {
 } from "./lib/store";
 import { testGitLabConnection } from "./lib/gitlab";
 import {
-  addMergeRequestSpentTime,
+  addTicketSpentTime,
   fetchMergeRequestCiStatus,
   fetchMergeRequestDiscussionNotes,
-  fetchMergeRequestTimeStats,
+  fetchTicketTimeStats,
   playCiJob,
+  setTicketTimeEstimate,
 } from "./lib/gitlab";
-import { DEFAULT_SETTINGS, type AppSnapshot, type MergeRequestItem, type Settings } from "./lib/types";
+import {
+  DEFAULT_SETTINGS,
+  type AppSnapshot,
+  type MergeRequestItem,
+  type Settings,
+  type TicketItem,
+} from "./lib/types";
 import "./App.css";
 
 const EMPTY_SNAPSHOT: AppSnapshot = {
@@ -206,22 +213,49 @@ function App() {
     (projectId: number, jobId: number) => playCiJob(settings, projectId, jobId),
     [settings],
   );
-  const handleAddMrSpentTime = useCallback(
-    async (mr: MergeRequestItem, duration: string) => {
+  const handleAddTicketSpentTime = useCallback(
+    async (ticket: TicketItem, duration: string) => {
       try {
-        await addMergeRequestSpentTime(settings, mr, duration);
-        const refreshedStats = await fetchMergeRequestTimeStats(settings, mr);
+        await addTicketSpentTime(settings, ticket, duration);
+        const refreshedStats = await fetchTicketTimeStats(settings, ticket);
 
         setSnapshot((current) => ({
           ...current,
-          mrs: current.mrs.map((candidate) =>
-            candidate.id === mr.id ? { ...candidate, ...refreshedStats } : candidate,
+          tickets: current.tickets.map((candidate) =>
+            candidate.id === ticket.id ? { ...candidate, ...refreshedStats } : candidate,
           ),
           error: null,
         }));
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Impossible d'ajouter le temps passé";
+
+        setSnapshot((current) => ({
+          ...current,
+          error: message,
+        }));
+
+        throw new Error(message);
+      }
+    },
+    [settings],
+  );
+  const handleSetTicketEstimate = useCallback(
+    async (ticket: TicketItem, duration: string) => {
+      try {
+        await setTicketTimeEstimate(settings, ticket, duration);
+        const refreshedStats = await fetchTicketTimeStats(settings, ticket);
+
+        setSnapshot((current) => ({
+          ...current,
+          tickets: current.tickets.map((candidate) =>
+            candidate.id === ticket.id ? { ...candidate, ...refreshedStats } : candidate,
+          ),
+          error: null,
+        }));
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Impossible de modifier l'estimate";
 
         setSnapshot((current) => ({
           ...current,
@@ -271,7 +305,8 @@ function App() {
         onLoadMrComments={handleLoadMrComments}
         onLoadMrCi={handleLoadMrCi}
         onPlayCiJob={handlePlayCiJob}
-        onAddMrSpentTime={handleAddMrSpentTime}
+        onAddTicketSpentTime={handleAddTicketSpentTime}
+        onSetTicketEstimate={handleSetTicketEstimate}
         mutedMrIids={settings.mutedMrIids}
         onToggleMuteMrIid={handleToggleMuteMrIid}
         showCommentAvatars={settings.showCommentAvatars}

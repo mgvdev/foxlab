@@ -7,6 +7,7 @@ import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,
   MergeRequestItem,
+  TicketItem,
 } from "../lib/types";
 
 export type ActiveTab = "comments" | "mrs" | "tickets";
@@ -26,7 +27,8 @@ interface TrayPopoverProps {
   onLoadMrComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadMrCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
-  onAddMrSpentTime: (mr: MergeRequestItem, duration: string) => Promise<void>;
+  onAddTicketSpentTime: (ticket: TicketItem, duration: string) => Promise<void>;
+  onSetTicketEstimate: (ticket: TicketItem, duration: string) => Promise<void>;
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
   showCommentAvatars: boolean;
@@ -75,7 +77,8 @@ export function TrayPopover({
   onLoadMrComments,
   onLoadMrCi,
   onPlayCiJob,
-  onAddMrSpentTime,
+  onAddTicketSpentTime,
+  onSetTicketEstimate,
   mutedMrIids,
   onToggleMuteMrIid,
   showCommentAvatars,
@@ -159,7 +162,6 @@ export function TrayPopover({
             onLoadCi={onLoadMrCi}
             onLoadComments={onLoadMrComments}
             onPlayCiJob={onPlayCiJob}
-            onAddSpentTime={onAddMrSpentTime}
             mutedMrIids={mutedMrIids}
             onToggleMuteMrIid={onToggleMuteMrIid}
             showAvatars={showCommentAvatars}
@@ -172,6 +174,8 @@ export function TrayPopover({
             tickets={snapshot.tickets}
             onOpen={onOpenTicket}
             onRetry={onRetry}
+            onAddSpentTime={onAddTicketSpentTime}
+            onSetEstimate={onSetTicketEstimate}
           />
         )}
       </section>

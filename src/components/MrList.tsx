@@ -15,7 +15,6 @@ interface MrListProps {
   onLoadComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
-  onAddSpentTime: (mr: MergeRequestItem, duration: string) => Promise<void>;
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
   showAvatars: boolean;
@@ -84,7 +83,6 @@ export function MrList({
   onLoadComments,
   onLoadCi,
   onPlayCiJob,
-  onAddSpentTime,
   mutedMrIids,
   onToggleMuteMrIid,
   showAvatars,
@@ -97,9 +95,6 @@ export function MrList({
   const [loadingByMr, setLoadingByMr] = useState<Record<number, boolean>>({});
   const [errorByMr, setErrorByMr] = useState<Record<number, string | null>>({});
   const [runningJobIds, setRunningJobIds] = useState<Set<number>>(new Set());
-  const [timeInputByMr, setTimeInputByMr] = useState<Record<number, string>>({});
-  const [timeSubmittingByMr, setTimeSubmittingByMr] = useState<Record<number, boolean>>({});
-  const [timeErrorByMr, setTimeErrorByMr] = useState<Record<number, string | null>>({});
 
   const handlePlayManualJob = async (mr: MergeRequestItem, jobId: number) => {
     if (runningJobIds.has(jobId)) {
@@ -161,37 +156,6 @@ export function MrList({
       }));
     } finally {
       setLoadingByMr((current) => ({ ...current, [mr.id]: false }));
-    }
-  };
-
-  const handleAddSpentTime = async (mr: MergeRequestItem, duration: string) => {
-    const normalized = duration.trim();
-
-    if (!normalized) {
-      setTimeErrorByMr((current) => ({
-        ...current,
-        [mr.id]: "Durée requise (ex: 30m, 1h 20m).",
-      }));
-      return;
-    }
-
-    if (timeSubmittingByMr[mr.id]) {
-      return;
-    }
-
-    setTimeSubmittingByMr((current) => ({ ...current, [mr.id]: true }));
-    setTimeErrorByMr((current) => ({ ...current, [mr.id]: null }));
-
-    try {
-      await onAddSpentTime(mr, normalized);
-      setTimeInputByMr((current) => ({ ...current, [mr.id]: "" }));
-    } catch (error) {
-      setTimeErrorByMr((current) => ({
-        ...current,
-        [mr.id]: error instanceof Error ? error.message : "Impossible d'ajouter le temps",
-      }));
-    } finally {
-      setTimeSubmittingByMr((current) => ({ ...current, [mr.id]: false }));
     }
   };
 
@@ -257,17 +221,6 @@ export function MrList({
         const mrError = errorByMr[mr.id];
         const approvedBy = mr.approvedBy ?? [];
         const isApproved = mr.approved && approvedBy.length > 0;
-        const timeSpent = mr.humanTotalTimeSpent || "0m";
-        const hasEstimate = mr.timeEstimateSeconds > 0;
-        const estimateLabel = hasEstimate ? mr.humanTimeEstimate : "No estimate";
-        const progressPercent = hasEstimate
-          ? Math.min(100, (mr.totalTimeSpentSeconds / mr.timeEstimateSeconds) * 100)
-          : 0;
-        const isOverrun = hasEstimate && mr.totalTimeSpentSeconds > mr.timeEstimateSeconds;
-        const isSubmittingTime = timeSubmittingByMr[mr.id] ?? false;
-        const timeInput = timeInputByMr[mr.id] ?? "";
-        const timeError = timeErrorByMr[mr.id];
-
         return (
           <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
             <div className="linear-item mr-item-trigger">
@@ -348,86 +301,10 @@ export function MrList({
                   </span>
                 </div>
                 <p className="linear-item-body">{mr.authorName}</p>
-                <div className="mr-time-row">
-                  <div className="mr-time-meta">
-                    <span>Spent {timeSpent}</span>
-                    <span>/</span>
-                    <span>Est. {estimateLabel}</span>
-                    {isOverrun && <span className="mr-time-overrun">Overrun</span>}
-                  </div>
-                  <div className={`mr-time-bar ${hasEstimate ? "" : "mr-time-no-estimate"}`}>
-                    <div
-                      className={`mr-time-fill ${isOverrun ? "mr-time-fill-overrun" : ""}`}
-                      style={{
-                        width: hasEstimate ? `${progressPercent}%` : "34%",
-                      }}
-                    />
-                  </div>
-                </div>
               </button>
               <button className="mr-open-btn" type="button" onClick={() => onOpen(mr.webUrl)}>
                 Open
               </button>
-              <Popover>
-                <Popover.Trigger aria-label={`Ajouter du temps sur MR !${mr.iid}`}>
-                  <button className="mr-time-btn" type="button">
-                    <svg className="mr-time-btn-icon" viewBox="0 0 20 20" aria-hidden="true">
-                      <path
-                        d="M7 2h6M8 2v2m4-2v2M5.5 7.2a6.2 6.2 0 1 1 9 0M10 8.2v3.3l2.3 1.3"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </Popover.Trigger>
-                <Popover.Content className="mr-time-popover">
-                  <Popover.Dialog>
-                    <Popover.Heading className="mr-time-popover-title">
-                      Add spent time
-                    </Popover.Heading>
-                    <div className="mr-time-quick-actions">
-                      {["15m", "30m", "1h"].map((preset) => (
-                        <button
-                          key={`${mr.id}-${preset}`}
-                          className="mr-time-quick-btn"
-                          disabled={isSubmittingTime}
-                          type="button"
-                          onClick={() => void handleAddSpentTime(mr, preset)}
-                        >
-                          +{preset}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="mr-time-input-row">
-                      <input
-                        className="mr-time-input"
-                        disabled={isSubmittingTime}
-                        placeholder="ex: 1h 20m"
-                        type="text"
-                        value={timeInput}
-                        onChange={(event) =>
-                          setTimeInputByMr((current) => ({
-                            ...current,
-                            [mr.id]: event.currentTarget.value,
-                          }))
-                        }
-                      />
-                      <button
-                        className="mr-time-submit-btn"
-                        disabled={isSubmittingTime}
-                        type="button"
-                        onClick={() => void handleAddSpentTime(mr, timeInput)}
-                      >
-                        {isSubmittingTime ? "..." : "Add"}
-                      </button>
-                    </div>
-                    {timeError && <p className="mr-time-error">{timeError}</p>}
-                  </Popover.Dialog>
-                </Popover.Content>
-              </Popover>
               <Popover>
                 <Popover.Trigger aria-label="MR actions">
                   <button className="mr-more-btn" type="button">

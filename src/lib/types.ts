@@ -21,10 +21,6 @@ export interface MergeRequestItem {
   state: "opened" | string;
   approved: boolean;
   approvedBy: MergeRequestApprover[];
-  timeEstimateSeconds: number;
-  totalTimeSpentSeconds: number;
-  humanTimeEstimate: string;
-  humanTotalTimeSpent: string;
 }
 
 export interface MergeRequestApprover {
@@ -33,7 +29,7 @@ export interface MergeRequestApprover {
   avatarUrl: string | null;
 }
 
-export interface MergeRequestTimeStats {
+export interface TicketTimeStats {
   timeEstimateSeconds: number;
   totalTimeSpentSeconds: number;
   humanTimeEstimate: string;
@@ -105,6 +101,10 @@ export interface TicketItem {
   authorName: string;
   updatedAt: string;
   labels: string[];
+  timeEstimateSeconds: number;
+  totalTimeSpentSeconds: number;
+  humanTimeEstimate: string;
+  humanTotalTimeSpent: string;
 }
 
 export interface GitLabUser {

@@ -186,6 +186,28 @@ body {
   gap: 8px;
 }
 
+.ticket-item-row {
+  border-bottom: 1px solid rgba(30, 48, 70, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+:root[data-theme="dark"] .ticket-item-row {
+  border-bottom-color: #1a2332;
+}
+
+.ticket-main-btn {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+}
+
 .mr-approval-placeholder {
   width: 34px;
   flex-shrink: 0;

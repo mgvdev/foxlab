@@ -7,13 +7,13 @@ import {
   type MergeRequestDiscussionNote,
   type MergeRequestCiStatus,
   type MergeRequestCiJob,
-  type MergeRequestTimeStats,
   MR_LIMIT,
   NOTES_PER_MR_LIMIT,
   REQUEST_TIMEOUT_MS,
   type Settings,
   type CommentItem,
   type TicketItem,
+  type TicketTimeStats,
 } from "./types";
 
 interface RawMergeRequest {
@@ -38,7 +38,7 @@ interface RawMergeRequestApprovals {
   approved_by?: Array<{ user?: RawApprovalUser } | RawApprovalUser>;
 }
 
-interface RawMergeRequestTimeStats {
+interface RawTimeStats {
   time_estimate?: number;
   total_time_spent?: number;
   human_time_estimate?: string;
@@ -147,7 +147,7 @@ async function post(url: string, token: string, context: string): Promise<void> 
   }
 }
 
-function emptyTimeStats(): MergeRequestTimeStats {
+function emptyTimeStats(): TicketTimeStats {
   return {
     timeEstimateSeconds: 0,
     totalTimeSpentSeconds: 0,
@@ -156,7 +156,7 @@ function emptyTimeStats(): MergeRequestTimeStats {
   };
 }
 
-function mapTimeStats(raw: RawMergeRequestTimeStats): MergeRequestTimeStats {
+function mapTimeStats(raw: RawTimeStats): TicketTimeStats {
   return {
     timeEstimateSeconds: Number(raw.time_estimate) || 0,
     totalTimeSpentSeconds: Number(raw.total_time_spent) || 0,
@@ -205,7 +205,6 @@ async function fetchMergeRequestsByScope(settings: Settings, scope: string): Pro
     state: mr.state,
     approved: false,
     approvedBy: [],
-    ...emptyTimeStats(),
   }));
 }
 
@@ -249,56 +248,6 @@ async function fetchMergeRequestApprovals(
   };
 }
 
-export async function fetchMergeRequestTimeStats(
-  settings: Settings,
-  mr: MergeRequestItem,
-): Promise<MergeRequestTimeStats> {
-  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
-  const token = settings.personalAccessToken.trim();
-  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/time_stats`;
-  const rawStats = await fetchJson<RawMergeRequestTimeStats>(url, token, `Time stats MR !${mr.iid}`);
-  return mapTimeStats(rawStats);
-}
-
-export async function addMergeRequestSpentTime(
-  settings: Settings,
-  mr: MergeRequestItem,
-  duration: string,
-): Promise<void> {
-  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
-  const token = settings.personalAccessToken.trim();
-  const normalizedDuration = duration.trim();
-
-  if (!normalizedDuration) {
-    throw new Error("Durée requise (ex: 30m, 1h 20m)");
-  }
-
-  const url = `${baseUrl}/api/v4/projects/${mr.projectId}/merge_requests/${mr.iid}/add_spent_time`;
-  const form = new URLSearchParams({ duration: normalizedDuration });
-
-  const response = await fetchWithTimeout(url, {
-    method: "POST",
-    headers: {
-      "PRIVATE-TOKEN": token,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: form.toString(),
-  });
-
-  if (response.ok) {
-    return;
-  }
-
-  if (response.status === 400) {
-    throw new Error("Format de durée invalide. Exemples: 30m, 1h, 1h 20m.");
-  }
-
-  if (response.status === 401 || response.status === 403 || response.status === 404) {
-    throw new Error("Impossible d'ajouter le temps (permissions insuffisantes ou MR inaccessible).");
-  }
-
-  throw buildGitLabError(response, `Ajout temps MR !${mr.iid}`);
-}
 
 export async function fetchTrackedMergeRequests(settings: Settings): Promise<MergeRequestItem[]> {
   const [assigned, reviews] = await Promise.all([
@@ -316,25 +265,13 @@ export async function fetchTrackedMergeRequests(settings: Settings): Promise<Mer
     .slice(0, MR_LIMIT);
 
   const enrichments = await mapWithConcurrency(trackedMrs, DEFAULT_CONCURRENCY, async (mr) => {
-    const [approvals, timeStats] = await Promise.all([
-      fetchMergeRequestApprovals(settings, mr).catch(() => ({ approved: false, approvedBy: [] })),
-      fetchMergeRequestTimeStats(settings, mr).catch(() => emptyTimeStats()),
-    ]);
-
-    return {
-      ...approvals,
-      ...timeStats,
-    };
+    return fetchMergeRequestApprovals(settings, mr).catch(() => ({ approved: false, approvedBy: [] }));
   });
 
   return trackedMrs.map((mr, index) => ({
     ...mr,
     approved: enrichments[index].approved,
     approvedBy: enrichments[index].approvedBy,
-    timeEstimateSeconds: enrichments[index].timeEstimateSeconds,
-    totalTimeSpentSeconds: enrichments[index].totalTimeSpentSeconds,
-    humanTimeEstimate: enrichments[index].humanTimeEstimate,
-    humanTotalTimeSpent: enrichments[index].humanTotalTimeSpent,
   }));
 }
 
@@ -428,8 +365,7 @@ export async function fetchAssignedTickets(settings: Settings): Promise<TicketIt
 
   const url = `${baseUrl}/api/v4/issues?${search.toString()}`;
   const issues = await fetchJson<RawIssue[]>(url, token, "Liste tickets assignés");
-
-  return issues.map((issue) => ({
+  const mappedIssues = issues.map((issue) => ({
     id: issue.id,
     iid: issue.iid,
     projectId: issue.project_id,
@@ -439,7 +375,112 @@ export async function fetchAssignedTickets(settings: Settings): Promise<TicketIt
     authorName: issue.author?.name ?? "Unknown",
     updatedAt: issue.updated_at,
     labels: issue.labels ?? [],
+    ...emptyTimeStats(),
   }));
+
+  const timeStats = await mapWithConcurrency(mappedIssues, DEFAULT_CONCURRENCY, async (ticket) => {
+    try {
+      return await fetchTicketTimeStats(settings, ticket);
+    } catch {
+      return emptyTimeStats();
+    }
+  });
+
+  return mappedIssues.map((ticket, index) => ({
+    ...ticket,
+    ...timeStats[index],
+  }));
+}
+
+export async function fetchTicketTimeStats(
+  settings: Settings,
+  ticket: TicketItem,
+): Promise<TicketTimeStats> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const url = `${baseUrl}/api/v4/projects/${ticket.projectId}/issues/${ticket.iid}/time_stats`;
+  const rawStats = await fetchJson<RawTimeStats>(url, token, `Time stats ticket #${ticket.iid}`);
+  return mapTimeStats(rawStats);
+}
+
+export async function addTicketSpentTime(
+  settings: Settings,
+  ticket: TicketItem,
+  duration: string,
+): Promise<void> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const normalizedDuration = duration.trim();
+
+  if (!normalizedDuration) {
+    throw new Error("Durée requise (ex: 30m, 1h 20m)");
+  }
+
+  const url = `${baseUrl}/api/v4/projects/${ticket.projectId}/issues/${ticket.iid}/add_spent_time`;
+  const form = new URLSearchParams({ duration: normalizedDuration });
+
+  const response = await fetchWithTimeout(url, {
+    method: "POST",
+    headers: {
+      "PRIVATE-TOKEN": token,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: form.toString(),
+  });
+
+  if (response.ok) {
+    return;
+  }
+
+  if (response.status === 400) {
+    throw new Error("Format de durée invalide. Exemples: 30m, 1h, 1h 20m.");
+  }
+
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
+    throw new Error("Impossible d'ajouter le temps (permissions insuffisantes ou ticket inaccessible).");
+  }
+
+  throw buildGitLabError(response, `Ajout temps ticket #${ticket.iid}`);
+}
+
+export async function setTicketTimeEstimate(
+  settings: Settings,
+  ticket: TicketItem,
+  duration: string,
+): Promise<void> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const normalizedDuration = duration.trim();
+
+  if (!normalizedDuration) {
+    throw new Error("Estimate requis (ex: 2h, 1d 2h)");
+  }
+
+  const url = `${baseUrl}/api/v4/projects/${ticket.projectId}/issues/${ticket.iid}/time_estimate`;
+  const form = new URLSearchParams({ duration: normalizedDuration });
+
+  const response = await fetchWithTimeout(url, {
+    method: "POST",
+    headers: {
+      "PRIVATE-TOKEN": token,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: form.toString(),
+  });
+
+  if (response.ok) {
+    return;
+  }
+
+  if (response.status === 400) {
+    throw new Error("Format d'estimate invalide. Exemples: 2h, 1d 2h.");
+  }
+
+  if (response.status === 401 || response.status === 403 || response.status === 404) {
+    throw new Error("Impossible de définir l'estimate (permissions insuffisantes ou ticket inaccessible).");
+  }
+
+  throw buildGitLabError(response, `Estimate ticket #${ticket.iid}`);
 }
 
 export async function fetchMergeRequestDiscussionNotes(
