@@ -237,14 +237,9 @@ export function TicketList({
                 <Popover.Trigger aria-label={`Ajouter du temps sur ticket #${ticket.iid}`}>
                   <button className="mr-time-btn" type="button">
                     <svg className="mr-time-btn-icon" viewBox="0 0 20 20" aria-hidden="true">
-                      <path
-                        d="M7 2h6M8 2v2m4-2v2M5.5 7.2a6.2 6.2 0 1 1 9 0M10 8.2v3.3l2.3 1.3"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
+                      <circle cx="9" cy="11" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M9 8.6v2.9l2 1.3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M14.7 3.8v4.2M12.6 5.9h4.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                     </svg>
                   </button>
                 </Popover.Trigger>
