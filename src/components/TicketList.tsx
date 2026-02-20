@@ -1,4 +1,4 @@
-import { Button, Card, Skeleton, Tooltip } from "@heroui/react";
+import { Button, Card, Skeleton } from "@heroui/react";
 import { useState, type CSSProperties } from "react";
 import type { TicketItem } from "../lib/types";
 
@@ -221,24 +221,17 @@ export function TicketList({
           <div key={ticket.id} className="linear-item ticket-item-row">
             <div className="ticket-toggle-btn">
               <div className="linear-item-head">
-                <Tooltip delay={150}>
-                  <Tooltip.Trigger aria-label={`Ticket #${ticket.iid}`}>
-                    <button
-                      className="ticket-title-btn"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        onOpen(ticket.webUrl);
-                      }}
-                    >
-                      #{ticket.iid} · {ticket.title}
-                    </button>
-                  </Tooltip.Trigger>
-                  <Tooltip.Content showArrow>
-                    <Tooltip.Arrow />
-                    <span>#{ticket.iid} · {ticket.title}</span>
-                  </Tooltip.Content>
-                </Tooltip>
+                <button
+                  className="ticket-title-btn"
+                  title={`#${ticket.iid} · ${ticket.title}`}
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpen(ticket.webUrl);
+                  }}
+                >
+                  #{ticket.iid} · {ticket.title}
+                </button>
                 <button
                   className="ticket-expand-btn"
                   type="button"
@@ -303,12 +296,13 @@ export function TicketList({
                       placeholder="spent: ex 1h 20m"
                       type="text"
                       value={timeInput}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = event.currentTarget.value;
                         setTimeInputByTicket((current) => ({
                           ...current,
-                          [ticket.id]: event.currentTarget.value,
-                        }))
-                      }
+                          [ticket.id]: value,
+                        }));
+                      }}
                     />
                     <button
                       className="mr-time-submit-btn"
@@ -326,12 +320,13 @@ export function TicketList({
                       placeholder="estimate: ex 2h"
                       type="text"
                       value={estimateInput}
-                      onChange={(event) =>
+                      onChange={(event) => {
+                        const value = event.currentTarget.value;
                         setEstimateInputByTicket((current) => ({
                           ...current,
-                          [ticket.id]: event.currentTarget.value,
-                        }))
-                      }
+                          [ticket.id]: value,
+                        }));
+                      }}
                     />
                     <button
                       className="mr-time-submit-btn"
