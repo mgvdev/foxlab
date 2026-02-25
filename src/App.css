@@ -1772,6 +1772,27 @@ body {
   color: var(--ui-fg);
 }
 
+.prefs-theme-select {
+  width: 100%;
+  height: 36px;
+  border: 1px solid color-mix(in oklab, var(--ui-input-border) 84%, transparent 16%);
+  border-radius: 9px;
+  padding: 0 10px;
+  background: color-mix(in oklab, var(--ui-input-bg) 90%, var(--ui-card-bg) 10%);
+  color: var(--ui-input-fg);
+  font-size: 12px;
+}
+
+.prefs-theme-select:focus {
+  outline: none;
+  border-color: var(--ui-ring);
+}
+
+.prefs-theme-select option {
+  background: var(--ui-card-bg);
+  color: var(--ui-fg);
+}
+
 .prefs-actions {
   margin-top: auto;
   display: flex;

@@ -214,7 +214,7 @@ export function StatsPage() {
     if (!settings) {
       return;
     }
-    applyThemeMode(settings.theme);
+    applyThemeMode(settings.theme, settings.themePreset);
   }, [settings]);
 
   useEffect(() => {

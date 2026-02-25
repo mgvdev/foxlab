@@ -26,7 +26,7 @@ export function SettingsPage() {
     if (!draft) {
       return;
     }
-    applyThemeMode(draft.theme);
+    applyThemeMode(draft.theme, draft.themePreset);
   }, [draft]);
 
   const handleSave = async () => {

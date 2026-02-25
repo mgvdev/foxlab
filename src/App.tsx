@@ -105,8 +105,8 @@ function MainWindowApp() {
   }, [windowPresenceState]);
 
   useEffect(() => {
-    applyThemeMode(settings.theme);
-  }, [settings.theme]);
+    applyThemeMode(settings.theme, settings.themePreset);
+  }, [settings.theme, settings.themePreset]);
 
   useEffect(() => {
     const bootstrap = async () => {

@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { PollIntervalMinutes, Settings, ThemeMode } from "@/lib/types";
+import {
+  THEME_PRESET_OPTIONS,
+  type PollIntervalMinutes,
+  type Settings,
+  type ThemeMode,
+  type ThemePreset,
+} from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type SettingsCategory = "connection" | "appearance" | "workflow";
@@ -21,6 +27,19 @@ interface SettingsFormProps {
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
 const AVATAR_OPTIONS = [true, false] as const;
+const THEME_PRESET_LABELS: Record<ThemePreset, string> = {
+  zinc: "Zinc",
+  slate: "Slate",
+  stone: "Stone",
+  neutral: "Neutral",
+  red: "Red",
+  rose: "Rose",
+  orange: "Orange",
+  green: "Green",
+  blue: "Blue",
+  yellow: "Yellow",
+  violet: "Violet",
+};
 
 const SETTINGS_CATEGORIES: Array<{
   id: SettingsCategory;
@@ -176,6 +195,24 @@ export function SettingsForm({
 
           {activeCategory === "appearance" && (
             <>
+              <div className="space-y-2">
+                <Label htmlFor="theme-preset">Palette (shadcn)</Label>
+                <select
+                  id="theme-preset"
+                  className="prefs-theme-select"
+                  value={draft.themePreset}
+                  onChange={(event) =>
+                    onChange({ ...draft, themePreset: event.currentTarget.value as ThemePreset })
+                  }
+                >
+                  {THEME_PRESET_OPTIONS.map((preset) => (
+                    <option key={preset} value={preset}>
+                      {THEME_PRESET_LABELS[preset]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-wide [color:var(--ui-muted-fg)]">Thème</p>
                 <OptionSegment

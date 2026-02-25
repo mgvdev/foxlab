@@ -1,5 +1,12 @@
 import { Store } from "@tauri-apps/plugin-store";
-import { DEFAULT_SETTINGS, type PollIntervalMinutes, type Settings, type ThemeMode } from "./types";
+import {
+  DEFAULT_SETTINGS,
+  THEME_PRESET_OPTIONS,
+  type PollIntervalMinutes,
+  type Settings,
+  type ThemeMode,
+  type ThemePreset,
+} from "./types";
 
 const STORE_PATH = "foxlab-settings.json";
 
@@ -7,6 +14,7 @@ const SETTINGS_BASE_URL_KEY = "settings.gitlabBaseUrl";
 const SETTINGS_TOKEN_KEY = "settings.personalAccessToken";
 const SETTINGS_POLL_INTERVAL_KEY = "settings.pollIntervalMinutes";
 const SETTINGS_THEME_KEY = "settings.theme";
+const SETTINGS_THEME_PRESET_KEY = "settings.themePreset";
 const SETTINGS_MUTED_MR_IIDS_KEY = "settings.mutedMrIids";
 const SETTINGS_SHOW_COMMENT_AVATARS_KEY = "settings.showCommentAvatars";
 const SETTINGS_CYCLE_START_LABEL_KEY = "settings.cycleStartLabel";
@@ -33,6 +41,10 @@ function isThemeMode(value: unknown): value is ThemeMode {
   return value === "light" || value === "dark";
 }
 
+function isThemePreset(value: unknown): value is ThemePreset {
+  return typeof value === "string" && THEME_PRESET_OPTIONS.includes(value as ThemePreset);
+}
+
 function parseMutedMrIids(value: unknown): number[] {
   if (!Array.isArray(value)) {
     return [];
@@ -46,11 +58,12 @@ function parseMutedMrIids(value: unknown): number[] {
 export async function loadSettings(): Promise<Settings> {
   const store = await getStore();
 
-  const [baseUrl, token, pollInterval, theme, mutedMrIids, showCommentAvatars, cycleStartLabel, cycleEndLabel] = await Promise.all([
+  const [baseUrl, token, pollInterval, theme, themePreset, mutedMrIids, showCommentAvatars, cycleStartLabel, cycleEndLabel] = await Promise.all([
     store.get<string>(SETTINGS_BASE_URL_KEY),
     store.get<string>(SETTINGS_TOKEN_KEY),
     store.get<number>(SETTINGS_POLL_INTERVAL_KEY),
     store.get<string>(SETTINGS_THEME_KEY),
+    store.get<string>(SETTINGS_THEME_PRESET_KEY),
     store.get<unknown>(SETTINGS_MUTED_MR_IIDS_KEY),
     store.get<boolean>(SETTINGS_SHOW_COMMENT_AVATARS_KEY),
     store.get<string>(SETTINGS_CYCLE_START_LABEL_KEY),
@@ -64,6 +77,7 @@ export async function loadSettings(): Promise<Settings> {
       ? pollInterval
       : DEFAULT_SETTINGS.pollIntervalMinutes,
     theme: isThemeMode(theme) ? theme : DEFAULT_SETTINGS.theme,
+    themePreset: isThemePreset(themePreset) ? themePreset : DEFAULT_SETTINGS.themePreset,
     mutedMrIids: parseMutedMrIids(mutedMrIids),
     showCommentAvatars:
       typeof showCommentAvatars === "boolean"
@@ -84,6 +98,7 @@ export async function saveSettings(settings: Settings): Promise<void> {
     store.set(SETTINGS_TOKEN_KEY, settings.personalAccessToken),
     store.set(SETTINGS_POLL_INTERVAL_KEY, settings.pollIntervalMinutes),
     store.set(SETTINGS_THEME_KEY, settings.theme),
+    store.set(SETTINGS_THEME_PRESET_KEY, settings.themePreset),
     store.set(SETTINGS_MUTED_MR_IIDS_KEY, settings.mutedMrIids),
     store.set(SETTINGS_SHOW_COMMENT_AVATARS_KEY, settings.showCommentAvatars),
     store.set(SETTINGS_CYCLE_START_LABEL_KEY, settings.cycleStartLabel),
