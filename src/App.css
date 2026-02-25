@@ -67,6 +67,9 @@
   --ui-tooltip-bg: color-mix(in oklab, var(--background) 28%, var(--foreground) 72%);
   --ui-tooltip-fg: var(--card);
   --ui-skeleton: color-mix(in oklab, var(--muted) 82%, var(--card) 18%);
+  --ui-scrollbar-track: color-mix(in oklab, var(--ui-surface) 70%, transparent 30%);
+  --ui-scrollbar-thumb: color-mix(in oklab, var(--ui-card-border) 64%, var(--ui-ring) 36%);
+  --ui-scrollbar-thumb-hover: color-mix(in oklab, var(--ui-card-border) 48%, var(--ui-ring) 52%);
 
   color: var(--foreground);
   background: transparent;
@@ -329,6 +332,43 @@ body {
   min-height: 0;
   flex: 1;
   overflow-x: hidden;
+}
+
+.content-zone,
+.linear-list,
+.stats-ticket-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-scrollbar-track);
+}
+
+.content-zone::-webkit-scrollbar,
+.linear-list::-webkit-scrollbar,
+.stats-ticket-list::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.content-zone::-webkit-scrollbar-track,
+.linear-list::-webkit-scrollbar-track,
+.stats-ticket-list::-webkit-scrollbar-track {
+  background: var(--ui-scrollbar-track);
+  border-radius: 999px;
+}
+
+.content-zone::-webkit-scrollbar-thumb,
+.linear-list::-webkit-scrollbar-thumb,
+.stats-ticket-list::-webkit-scrollbar-thumb {
+  background: var(--ui-scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.content-zone::-webkit-scrollbar-thumb:hover,
+.linear-list::-webkit-scrollbar-thumb:hover,
+.stats-ticket-list::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-scrollbar-thumb-hover);
+  background-clip: padding-box;
 }
 
 .linear-list {
