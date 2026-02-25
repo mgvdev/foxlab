@@ -1,6 +1,6 @@
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
-use tauri::{Manager, PhysicalPosition, Position, WindowEvent};
+use tauri::{Emitter, Manager, PhysicalPosition, Position, WindowEvent};
 
 fn position_main_window_near_tray(
     window: &tauri::WebviewWindow,
@@ -20,7 +20,7 @@ fn position_main_window_near_tray(
 fn toggle_main_window(app: &tauri::AppHandle, position: Option<PhysicalPosition<f64>>) {
     if let Some(window) = app.get_webview_window("main") {
         if window.is_visible().unwrap_or(false) {
-            let _ = window.hide();
+            let _ = window.emit("main-window:request-exit", ());
             return;
         }
 
@@ -30,12 +30,22 @@ fn toggle_main_window(app: &tauri::AppHandle, position: Option<PhysicalPosition<
 
         let _ = window.show();
         let _ = window.set_focus();
+        let _ = window.emit("main-window:enter", ());
     }
+}
+
+#[tauri::command]
+fn hide_main_window(app: tauri::AppHandle) -> Result<(), String> {
+    let window = app
+        .get_webview_window("main")
+        .ok_or_else(|| "Main window not found".to_string())?;
+    window.hide().map_err(|error| error.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![hide_main_window])
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
@@ -81,7 +91,7 @@ pub fn run() {
             }
 
             if let WindowEvent::Focused(false) = event {
-                let _ = window.hide();
+                let _ = window.emit("main-window:request-exit", ());
             }
         })
         .run(tauri::generate_context!())
