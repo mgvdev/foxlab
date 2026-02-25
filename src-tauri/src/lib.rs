@@ -6,7 +6,7 @@ fn position_main_window_near_tray(
     window: &tauri::WebviewWindow,
     position: PhysicalPosition<f64>,
 ) {
-    let fallback_width = 420i32;
+    let fallback_width = 500i32;
     let width = window
         .outer_size()
         .map(|size| size.width as i32)

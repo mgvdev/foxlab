@@ -14,9 +14,9 @@
     "windows": [
       {
         "title": "foxlab",
-        "width": 420,
+        "width": 500,
         "height": 560,
-        "minWidth": 420,
+        "minWidth": 500,
         "minHeight": 560,
         "resizable": false,
         "alwaysOnTop": true,
