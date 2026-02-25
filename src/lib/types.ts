@@ -38,6 +38,9 @@ export interface TicketTimeStats {
 
 export interface MergeRequestDiscussionNote {
   id: number;
+  discussionId: string;
+  threadRootNoteId: number;
+  isThreadRoot: boolean;
   mrIid: number;
   projectId: number;
   body: string;

@@ -78,6 +78,7 @@ interface RawDiscussionNote {
 }
 
 interface RawDiscussion {
+  id?: string;
   notes: RawDiscussionNote[];
 }
 
@@ -559,14 +560,24 @@ export async function fetchMergeRequestDiscussionNotes(
   const discussions = await fetchJson<RawDiscussion[]>(url, token, `Discussions MR !${mr.iid}`);
 
   const notes: MergeRequestDiscussionNote[] = [];
-  for (const discussion of discussions) {
-    for (const note of discussion.notes ?? []) {
-      if (note.system) {
-        continue;
-      }
+  for (const [discussionIndex, discussion] of discussions.entries()) {
+    const discussionId = discussion.id?.trim() || `${mr.projectId}:${mr.iid}:discussion-${discussionIndex}`;
+    const visibleNotes = (discussion.notes ?? []).filter((note) => !note.system);
 
+    if (visibleNotes.length === 0) {
+      continue;
+    }
+
+    const threadRoot = [...visibleNotes].sort(
+      (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
+    )[0];
+
+    for (const note of visibleNotes) {
       notes.push({
         id: note.id,
+        discussionId,
+        threadRootNoteId: threadRoot.id,
+        isThreadRoot: note.id === threadRoot.id,
         mrIid: mr.iid,
         projectId: mr.projectId,
         body: note.body?.trim() ?? "",

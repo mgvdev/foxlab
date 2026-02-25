@@ -118,6 +118,41 @@ async function writeToClipboard(value: string): Promise<void> {
   document.body.removeChild(textArea);
 }
 
+interface DiscussionThread {
+  discussionId: string;
+  root: MergeRequestDiscussionNote;
+  replies: MergeRequestDiscussionNote[];
+  latestActivityAt: string;
+}
+
+function buildDiscussionThreads(notes: MergeRequestDiscussionNote[]): DiscussionThread[] {
+  const byDiscussion = new Map<string, MergeRequestDiscussionNote[]>();
+
+  for (const note of notes) {
+    const current = byDiscussion.get(note.discussionId) ?? [];
+    current.push(note);
+    byDiscussion.set(note.discussionId, current);
+  }
+
+  const threads = [...byDiscussion.entries()].map(([discussionId, discussionNotes]) => {
+    const sortedByCreatedAt = [...discussionNotes].sort(
+      (a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt),
+    );
+    const root = sortedByCreatedAt.find((note) => note.isThreadRoot) ?? sortedByCreatedAt[0];
+    const replies = sortedByCreatedAt.filter((note) => note.id !== root.id);
+    const latestActivityAt = sortedByCreatedAt[sortedByCreatedAt.length - 1]?.createdAt ?? root.createdAt;
+
+    return {
+      discussionId,
+      root,
+      replies,
+      latestActivityAt,
+    };
+  });
+
+  return threads.sort((a, b) => Date.parse(b.latestActivityAt) - Date.parse(a.latestActivityAt));
+}
+
 export function MrList({
   mrs,
   loading,
@@ -141,6 +176,7 @@ export function MrList({
   const [runningJobIds, setRunningJobIds] = useState<Set<number>>(new Set());
   const [selectedNoteIdsByMr, setSelectedNoteIdsByMr] = useState<Record<number, number[]>>({});
   const [copyFeedbackByMr, setCopyFeedbackByMr] = useState<Record<number, string | null>>({});
+  const [expandedThreadIdsByMr, setExpandedThreadIdsByMr] = useState<Record<number, string[]>>({});
 
   const handlePlayManualJob = async (mr: MergeRequestItem, jobId: number) => {
     if (runningJobIds.has(jobId)) {
@@ -228,6 +264,23 @@ export function MrList({
     }));
   };
 
+  const toggleThread = (mrId: number, discussionId: string) => {
+    setExpandedThreadIdsByMr((current) => {
+      const expanded = new Set(current[mrId] ?? []);
+
+      if (expanded.has(discussionId)) {
+        expanded.delete(discussionId);
+      } else {
+        expanded.add(discussionId);
+      }
+
+      return {
+        ...current,
+        [mrId]: [...expanded],
+      };
+    });
+  };
+
   const copyPromptForNotes = async (
     mr: MergeRequestItem,
     notes: MergeRequestDiscussionNote[],
@@ -279,6 +332,16 @@ export function MrList({
       .slice(0, 2)
       .map((part) => part.charAt(0).toUpperCase())
       .join("") || "?";
+  const renderNoteStatus = (note: MergeRequestDiscussionNote) =>
+    note.resolvable ? (
+      <Chip className="mr-status-chip" color={note.resolved ? "success" : "warning"} size="sm" variant="soft">
+        {note.resolved ? "resolved" : "unresolved"}
+      </Chip>
+    ) : (
+      <Chip className="mr-status-chip" color="default" size="sm" variant="soft">
+        note
+      </Chip>
+    );
 
   if (loading) {
     return <LoadingState />;
@@ -314,12 +377,14 @@ export function MrList({
         const isExpanded = expandedIds.has(mr.id);
         const notes = commentCache[mr.id] ?? [];
         const displayedNotes = notes.slice(0, 20);
+        const discussionThreads = buildDiscussionThreads(displayedNotes);
         const ci = ciCache[mr.id];
         const isLoadingComments = loadingByMr[mr.id] ?? false;
         const mrError = errorByMr[mr.id];
         const approvedBy = mr.approvedBy ?? [];
         const isApproved = mr.approved && approvedBy.length > 0;
         const selectedIds = selectedNoteIdsByMr[mr.id] ?? [];
+        const expandedThreadIds = new Set(expandedThreadIdsByMr[mr.id] ?? []);
         const allDisplayedSelected =
           displayedNotes.length > 0 && displayedNotes.every((note) => selectedIds.includes(note.id));
         const selectedDisplayedNotes = displayedNotes.filter((note) => selectedIds.includes(note.id));
@@ -556,61 +621,126 @@ export function MrList({
                           </div>
                         </div>
                         {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
-                        {displayedNotes.map((note) => (
-                          <div key={`${mr.id}-${note.id}`} className="mr-comment-item">
-                            <div className="mr-comment-head">
-                              <div className="mr-comment-author-wrap">
-                                <input
-                                  checked={selectedIds.includes(note.id)}
-                                  className="mr-comment-check"
-                                  type="checkbox"
-                                  onChange={() => toggleNoteSelection(mr.id, note.id)}
-                                />
-                                {showAvatars &&
-                                  (note.authorAvatarUrl ? (
-                                    <img
-                                      alt={note.authorName}
-                                      className="comment-avatar"
-                                      src={note.authorAvatarUrl}
+                        {discussionThreads.map((thread) => {
+                          const hasReplies = thread.replies.length > 0;
+                          const isThreadOpen = expandedThreadIds.has(thread.discussionId);
+                          const threadLabel =
+                            thread.replies.length === 1
+                              ? "1 réponse"
+                              : `${thread.replies.length} réponses`;
+
+                          return (
+                            <div key={`${mr.id}-${thread.discussionId}-${thread.root.id}`} className="mr-thread">
+                              <div className="mr-comment-item mr-comment-item--root">
+                                <div className="mr-comment-head">
+                                  <div className="mr-comment-author-wrap">
+                                    <input
+                                      checked={selectedIds.includes(thread.root.id)}
+                                      className="mr-comment-check"
+                                      type="checkbox"
+                                      onChange={() => toggleNoteSelection(mr.id, thread.root.id)}
                                     />
-                                  ) : (
-                                    <span className="comment-avatar comment-avatar-fallback">
-                                      {initials(note.authorName)}
+                                    {showAvatars &&
+                                      (thread.root.authorAvatarUrl ? (
+                                        <img
+                                          alt={thread.root.authorName}
+                                          className="comment-avatar"
+                                          src={thread.root.authorAvatarUrl}
+                                        />
+                                      ) : (
+                                        <span className="comment-avatar comment-avatar-fallback">
+                                          {initials(thread.root.authorName)}
+                                        </span>
+                                      ))}
+                                    <span className="mr-comment-author">{thread.root.authorName}</span>
+                                  </div>
+                                  <div className="mr-comment-meta">
+                                    {renderNoteStatus(thread.root)}
+                                    <span className="linear-item-meta">
+                                      {formatRelativeTime(thread.root.createdAt)}
                                     </span>
-                                  ))}
-                                <span className="mr-comment-author">{note.authorName}</span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                {note.resolvable ? (
-                                  <Chip
-                                    className="mr-status-chip"
-                                    color={note.resolved ? "success" : "warning"}
-                                    size="sm"
-                                    variant="soft"
-                                  >
-                                    {note.resolved ? "resolved" : "unresolved"}
-                                  </Chip>
-                                ) : (
-                                  <Chip className="mr-status-chip" color="default" size="sm" variant="soft">
-                                    note
-                                  </Chip>
+                                    <button
+                                      className="mr-inline-link"
+                                      type="button"
+                                      onClick={() => onOpen(thread.root.webUrl)}
+                                    >
+                                      Open
+                                    </button>
+                                  </div>
+                                </div>
+                                {thread.root.reference && (
+                                  <p className="mr-comment-ref">
+                                    {formatDiscussionReferenceLabel(thread.root)}
+                                  </p>
                                 )}
-                                <span className="linear-item-meta">{formatRelativeTime(note.createdAt)}</span>
-                                <button
-                                  className="mr-inline-link"
-                                  type="button"
-                                  onClick={() => onOpen(note.webUrl)}
-                                >
-                                  Open
-                                </button>
+                                <p className="mr-comment-body">{thread.root.body || "(sans contenu)"}</p>
+                                {hasReplies && (
+                                  <div className="mr-thread-toggle-row">
+                                    <button
+                                      className="mr-thread-toggle"
+                                      type="button"
+                                      onClick={() => toggleThread(mr.id, thread.discussionId)}
+                                    >
+                                      <span>{isThreadOpen ? `Masquer ${threadLabel}` : `Voir ${threadLabel}`}</span>
+                                      <span className={`mr-thread-arrow ${isThreadOpen ? "is-open" : ""}`}>
+                                        ▾
+                                      </span>
+                                    </button>
+                                  </div>
+                                )}
                               </div>
+
+                              {hasReplies && isThreadOpen && (
+                                <div className="mr-thread-replies">
+                                  {thread.replies.map((note) => (
+                                    <div key={`${mr.id}-${note.id}`} className="mr-comment-item mr-comment-item--reply">
+                                      <div className="mr-comment-head">
+                                        <div className="mr-comment-author-wrap">
+                                          <input
+                                            checked={selectedIds.includes(note.id)}
+                                            className="mr-comment-check"
+                                            type="checkbox"
+                                            onChange={() => toggleNoteSelection(mr.id, note.id)}
+                                          />
+                                          {showAvatars &&
+                                            (note.authorAvatarUrl ? (
+                                              <img
+                                                alt={note.authorName}
+                                                className="comment-avatar"
+                                                src={note.authorAvatarUrl}
+                                              />
+                                            ) : (
+                                              <span className="comment-avatar comment-avatar-fallback">
+                                                {initials(note.authorName)}
+                                              </span>
+                                            ))}
+                                          <span className="mr-comment-author">{note.authorName}</span>
+                                        </div>
+                                        <div className="mr-comment-meta">
+                                          {renderNoteStatus(note)}
+                                          <span className="linear-item-meta">
+                                            {formatRelativeTime(note.createdAt)}
+                                          </span>
+                                          <button
+                                            className="mr-inline-link"
+                                            type="button"
+                                            onClick={() => onOpen(note.webUrl)}
+                                          >
+                                            Open
+                                          </button>
+                                        </div>
+                                      </div>
+                                      {note.reference && (
+                                        <p className="mr-comment-ref">{formatDiscussionReferenceLabel(note)}</p>
+                                      )}
+                                      <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                            {note.reference && (
-                              <p className="mr-comment-ref">{formatDiscussionReferenceLabel(note)}</p>
-                            )}
-                            <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </>
