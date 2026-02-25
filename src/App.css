@@ -1346,6 +1346,15 @@ body {
   word-break: break-word;
 }
 
+.mr-copy-path-popover {
+  width: auto;
+  min-width: 0;
+  padding: 5px 7px;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .mr-thread-toggle-row {
   margin-top: 4px;
 }

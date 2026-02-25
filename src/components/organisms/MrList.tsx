@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Card, Chip, Popover, Skeleton, Tooltip } from "@/components/ui/legacy";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type {
@@ -223,6 +223,16 @@ export function MrList({
   const [selectedNoteIdsByMr, setSelectedNoteIdsByMr] = useState<Record<number, number[]>>({});
   const [copyFeedbackByMr, setCopyFeedbackByMr] = useState<Record<number, string | null>>({});
   const [expandedThreadIdsByMr, setExpandedThreadIdsByMr] = useState<Record<number, string[]>>({});
+  const [copiedPathKey, setCopiedPathKey] = useState<string | null>(null);
+  const copiedPathTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copiedPathTimeoutRef.current !== null) {
+        window.clearTimeout(copiedPathTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handlePlayManualJob = async (mr: MergeRequestItem, jobId: number) => {
     if (runningJobIds.has(jobId)) {
@@ -355,13 +365,18 @@ export function MrList({
     }
   };
 
-  const copyReferencePath = async (mrId: number, path: string) => {
+  const copyReferencePath = async (mrId: number, pathKey: string, path: string) => {
     try {
       await writeToClipboard(path);
-      setCopyFeedbackByMr((current) => ({
-        ...current,
-        [mrId]: "Chemin copié",
-      }));
+      setCopiedPathKey(pathKey);
+
+      if (copiedPathTimeoutRef.current !== null) {
+        window.clearTimeout(copiedPathTimeoutRef.current);
+      }
+
+      copiedPathTimeoutRef.current = window.setTimeout(() => {
+        setCopiedPathKey((current) => (current === pathKey ? null : current));
+      }, 1100);
     } catch (error) {
       setCopyFeedbackByMr((current) => ({
         ...current,
@@ -373,6 +388,7 @@ export function MrList({
   const renderReference = (mrId: number, note: MergeRequestDiscussionNote) => {
     const referencePath = extractReferencePath(note);
     const lineSuffix = formatLineSuffix(note);
+    const pathKey = `${mrId}:${note.id}`;
 
     if (!referencePath) {
       return (
@@ -401,17 +417,26 @@ export function MrList({
             </Popover.Dialog>
           </Popover.Content>
         </Popover>
-        <button
-          aria-label="Copier le chemin"
-          className="mr-comment-ref-copy"
-          type="button"
-          onClick={() => void copyReferencePath(mrId, referencePath.fullPath)}
-        >
-          <svg className="mr-comment-ref-copy-icon" viewBox="0 0 20 20" aria-hidden="true">
-            <rect x="7" y="3.5" width="9" height="11" rx="1.7" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M4.5 14V6.8a1.8 1.8 0 0 1 1.8-1.8h6.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
+        <Popover open={copiedPathKey === pathKey}>
+          <Popover.Trigger aria-label="Copier le chemin">
+            <button
+              aria-label="Copier le chemin"
+              className="mr-comment-ref-copy"
+              type="button"
+              onClick={() => void copyReferencePath(mrId, pathKey, referencePath.fullPath)}
+            >
+              <svg className="mr-comment-ref-copy-icon" viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="7" y="3.5" width="9" height="11" rx="1.7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                <path d="M4.5 14V6.8a1.8 1.8 0 0 1 1.8-1.8h6.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </Popover.Trigger>
+          <Popover.Content className="mr-copy-path-popover">
+            <Popover.Dialog>
+              <span>Copié</span>
+            </Popover.Dialog>
+          </Popover.Content>
+        </Popover>
       </div>
     );
   };
