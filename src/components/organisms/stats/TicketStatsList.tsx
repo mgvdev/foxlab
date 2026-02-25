@@ -1,5 +1,6 @@
 import type React from "react";
 import type { TicketItem } from "@/lib/types";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import { StatsTicketRow } from "./StatsTicketRow";
 
@@ -32,27 +33,29 @@ export function TicketStatsList({
 }: TicketStatsListProps) {
   return (
     <section className="stats-ticket-list">
-      {tickets.map((ticket) => {
-        const key = ticketKey(ticket);
+      <ScrollArea className="themed-scroll-area">
+        {tickets.map((ticket) => {
+          const key = ticketKey(ticket);
 
-        return (
-          <div
-            key={key}
-            ref={(node) => {
-              ticketRefs.current[key] = node;
-            }}
-          >
-            <StatsTicketRow
-              cycleConfigured={cycleConfigured}
-              cycleStats={cycleStatsByTicket[key]}
-              formatDuration={formatDuration}
-              isFocused={focusedTicketKey === key}
-              ticket={ticket}
-              onOpen={onOpen}
-            />
-          </div>
-        );
-      })}
+          return (
+            <div
+              key={key}
+              ref={(node) => {
+                ticketRefs.current[key] = node;
+              }}
+            >
+              <StatsTicketRow
+                cycleConfigured={cycleConfigured}
+                cycleStats={cycleStatsByTicket[key]}
+                formatDuration={formatDuration}
+                isFocused={focusedTicketKey === key}
+                ticket={ticket}
+                onOpen={onOpen}
+              />
+            </div>
+          );
+        })}
+      </ScrollArea>
     </section>
   );
 }

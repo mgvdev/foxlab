@@ -334,50 +334,18 @@ body {
   overflow-x: hidden;
 }
 
-.content-zone,
-.linear-list,
-.stats-ticket-list {
-  scrollbar-width: thin;
-  scrollbar-color: var(--ui-scrollbar-thumb) var(--ui-scrollbar-track);
-}
-
-.content-zone::-webkit-scrollbar,
-.linear-list::-webkit-scrollbar,
-.stats-ticket-list::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-.content-zone::-webkit-scrollbar-track,
-.linear-list::-webkit-scrollbar-track,
-.stats-ticket-list::-webkit-scrollbar-track {
-  background: var(--ui-scrollbar-track);
-  border-radius: 999px;
-}
-
-.content-zone::-webkit-scrollbar-thumb,
-.linear-list::-webkit-scrollbar-thumb,
-.stats-ticket-list::-webkit-scrollbar-thumb {
-  background: var(--ui-scrollbar-thumb);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.content-zone::-webkit-scrollbar-thumb:hover,
-.linear-list::-webkit-scrollbar-thumb:hover,
-.stats-ticket-list::-webkit-scrollbar-thumb:hover {
-  background: var(--ui-scrollbar-thumb-hover);
-  background-clip: padding-box;
-}
-
 .linear-list {
   height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
+  min-height: 0;
+  overflow: hidden;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--ui-card-border) 80%, transparent 20%);
   background: color-mix(in srgb, var(--ui-card-bg) 90%, transparent 10%);
+}
+
+.themed-scroll-area {
+  width: 100%;
+  height: 100%;
 }
 
 .linear-item {
@@ -1480,7 +1448,7 @@ body {
 .stats-ticket-list {
   min-height: 0;
   flex: 1;
-  overflow-y: auto;
+  overflow: hidden;
   border-radius: 10px;
   border: 1px solid color-mix(in oklab, var(--ui-card-border) 80%, transparent 20%);
   background: color-mix(in oklab, var(--ui-card-bg) 86%, var(--background) 14%);

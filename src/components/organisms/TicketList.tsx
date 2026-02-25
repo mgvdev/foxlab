@@ -1,4 +1,5 @@
 import { Button, Card, Popover, Skeleton } from "@/components/ui/legacy";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, type CSSProperties } from "react";
 import type { TicketItem } from "@/lib/types";
 
@@ -206,21 +207,22 @@ export function TicketList({
 
   return (
     <div className="linear-list">
-      {tickets.map((ticket) => {
-        const hasEstimate = ticket.timeEstimateSeconds > 0;
-        const estimateLabel = hasEstimate ? ticket.humanTimeEstimate : "No estimate";
-        const rawRatio = hasEstimate ? ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds : 0;
-        const progressPercent = hasEstimate ? Math.min(100, rawRatio * 100) : 0;
-        const isOverrun = hasEstimate && ticket.totalTimeSpentSeconds > ticket.timeEstimateSeconds;
-        const isSubmittingTime = timeSubmittingByTicket[ticket.id] ?? false;
-        const isSubmittingEstimate = estimateSubmittingByTicket[ticket.id] ?? false;
-        const timeInput = timeInputByTicket[ticket.id] ?? "";
-        const estimateInput = estimateInputByTicket[ticket.id] ?? "";
-        const timeError = timeErrorByTicket[ticket.id];
-        const fillColor = progressColor(rawRatio, isOverrun, hasEstimate);
+      <ScrollArea className="themed-scroll-area">
+        {tickets.map((ticket) => {
+          const hasEstimate = ticket.timeEstimateSeconds > 0;
+          const estimateLabel = hasEstimate ? ticket.humanTimeEstimate : "No estimate";
+          const rawRatio = hasEstimate ? ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds : 0;
+          const progressPercent = hasEstimate ? Math.min(100, rawRatio * 100) : 0;
+          const isOverrun = hasEstimate && ticket.totalTimeSpentSeconds > ticket.timeEstimateSeconds;
+          const isSubmittingTime = timeSubmittingByTicket[ticket.id] ?? false;
+          const isSubmittingEstimate = estimateSubmittingByTicket[ticket.id] ?? false;
+          const timeInput = timeInputByTicket[ticket.id] ?? "";
+          const estimateInput = estimateInputByTicket[ticket.id] ?? "";
+          const timeError = timeErrorByTicket[ticket.id];
+          const fillColor = progressColor(rawRatio, isOverrun, hasEstimate);
 
-        return (
-          <div key={ticket.id} className="linear-item ticket-item-row">
+          return (
+            <div key={ticket.id} className="linear-item ticket-item-row">
             <div
               className="ticket-toggle-btn"
               role="button"
@@ -367,9 +369,10 @@ export function TicketList({
                 </div>
               </div>
             )}
-          </div>
-        );
-      })}
+            </div>
+          );
+        })}
+      </ScrollArea>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button, Card, Skeleton } from "@/components/ui/legacy";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type { CommentItem } from "@/lib/types";
 import { buildCommentsCorrectionPrompt } from "@/lib/mrPrompt";
 
@@ -125,74 +126,76 @@ export function CommentsList({
 
   return (
     <div className="linear-list">
-      <div className="mr-comment-list">
-        <div className="mr-comment-toolbar">
-          <div className="mr-comment-toolbar-group">
-            <button
-              className="mr-inline-tool-btn"
-              type="button"
-              onClick={() =>
-                setSelectedCommentKeys(allSelected ? [] : comments.map((comment) => comment.key))
-              }
-            >
-              {allSelected ? "Désélectionner" : "Tout sélectionner"}
-            </button>
-            <button
-              className="mr-inline-tool-btn"
-              type="button"
-              onClick={() => setSelectedCommentKeys([])}
-            >
-              Effacer
-            </button>
-          </div>
-          <div className="mr-comment-toolbar-group">
-            <button
-              className="mr-inline-tool-btn"
-              disabled={selectedComments.length === 0}
-              type="button"
-              onClick={() => void copyPrompt("selection")}
-            >
-              Copier sélection
-            </button>
-            <button className="mr-inline-tool-btn" type="button" onClick={() => void copyPrompt("all")}>
-              Copier tout
-            </button>
-          </div>
-        </div>
-        {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
-        {comments.map((comment) => (
-          <div key={comment.key} className="mr-comment-item">
-            <div className="mr-comment-head comment-row-head">
-              <div className="comment-head-main">
-                <input
-                  checked={selectedCommentKeys.includes(comment.key)}
-                  className="mr-comment-check"
-                  type="checkbox"
-                  onChange={() => toggleSelection(comment.key)}
-                />
-                {showAvatars &&
-                  (comment.authorAvatarUrl ? (
-                    <img
-                      alt={comment.authorName}
-                      className="comment-avatar"
-                      src={comment.authorAvatarUrl}
-                    />
-                  ) : (
-                    <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
-                  ))}
-                <span className="linear-item-title">MR !{comment.mrIid}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
-                <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
-                  Open
-                </button>
-              </div>
+      <ScrollArea className="themed-scroll-area">
+        <div className="mr-comment-list">
+          <div className="mr-comment-toolbar">
+            <div className="mr-comment-toolbar-group">
+              <button
+                className="mr-inline-tool-btn"
+                type="button"
+                onClick={() =>
+                  setSelectedCommentKeys(allSelected ? [] : comments.map((comment) => comment.key))
+                }
+              >
+                {allSelected ? "Désélectionner" : "Tout sélectionner"}
+              </button>
+              <button
+                className="mr-inline-tool-btn"
+                type="button"
+                onClick={() => setSelectedCommentKeys([])}
+              >
+                Effacer
+              </button>
             </div>
-            <p className="comments-item-body">{comment.body || "(sans contenu)"}</p>
+            <div className="mr-comment-toolbar-group">
+              <button
+                className="mr-inline-tool-btn"
+                disabled={selectedComments.length === 0}
+                type="button"
+                onClick={() => void copyPrompt("selection")}
+              >
+                Copier sélection
+              </button>
+              <button className="mr-inline-tool-btn" type="button" onClick={() => void copyPrompt("all")}>
+                Copier tout
+              </button>
+            </div>
           </div>
-        ))}
-      </div>
+          {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
+          {comments.map((comment) => (
+            <div key={comment.key} className="mr-comment-item">
+              <div className="mr-comment-head comment-row-head">
+                <div className="comment-head-main">
+                  <input
+                    checked={selectedCommentKeys.includes(comment.key)}
+                    className="mr-comment-check"
+                    type="checkbox"
+                    onChange={() => toggleSelection(comment.key)}
+                  />
+                  {showAvatars &&
+                    (comment.authorAvatarUrl ? (
+                      <img
+                        alt={comment.authorName}
+                        className="comment-avatar"
+                        src={comment.authorAvatarUrl}
+                      />
+                    ) : (
+                      <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
+                    ))}
+                  <span className="linear-item-title">MR !{comment.mrIid}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
+                  <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
+                    Open
+                  </button>
+                </div>
+              </div>
+              <p className="comments-item-body">{comment.body || "(sans contenu)"}</p>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
     </div>
   );
 }

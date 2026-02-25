@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button, Card, Chip, Popover, Skeleton, Tooltip } from "@/components/ui/legacy";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,
@@ -372,26 +373,27 @@ export function MrList({
 
   return (
     <div className="linear-list">
-      {orderedMrs.map((mr) => {
-        const isMuted = mutedSet.has(mr.iid);
-        const isExpanded = expandedIds.has(mr.id);
-        const notes = commentCache[mr.id] ?? [];
-        const displayedNotes = notes.slice(0, 20);
-        const discussionThreads = buildDiscussionThreads(displayedNotes);
-        const ci = ciCache[mr.id];
-        const isLoadingComments = loadingByMr[mr.id] ?? false;
-        const mrError = errorByMr[mr.id];
-        const approvedBy = mr.approvedBy ?? [];
-        const isApproved = mr.approved && approvedBy.length > 0;
-        const selectedIds = selectedNoteIdsByMr[mr.id] ?? [];
-        const expandedThreadIds = new Set(expandedThreadIdsByMr[mr.id] ?? []);
-        const allDisplayedSelected =
-          displayedNotes.length > 0 && displayedNotes.every((note) => selectedIds.includes(note.id));
-        const selectedDisplayedNotes = displayedNotes.filter((note) => selectedIds.includes(note.id));
-        const copyFeedback = copyFeedbackByMr[mr.id];
-        return (
-          <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
-            <div className="linear-item mr-item-trigger">
+      <ScrollArea className="themed-scroll-area">
+        {orderedMrs.map((mr) => {
+          const isMuted = mutedSet.has(mr.iid);
+          const isExpanded = expandedIds.has(mr.id);
+          const notes = commentCache[mr.id] ?? [];
+          const displayedNotes = notes.slice(0, 20);
+          const discussionThreads = buildDiscussionThreads(displayedNotes);
+          const ci = ciCache[mr.id];
+          const isLoadingComments = loadingByMr[mr.id] ?? false;
+          const mrError = errorByMr[mr.id];
+          const approvedBy = mr.approvedBy ?? [];
+          const isApproved = mr.approved && approvedBy.length > 0;
+          const selectedIds = selectedNoteIdsByMr[mr.id] ?? [];
+          const expandedThreadIds = new Set(expandedThreadIdsByMr[mr.id] ?? []);
+          const allDisplayedSelected =
+            displayedNotes.length > 0 && displayedNotes.every((note) => selectedIds.includes(note.id));
+          const selectedDisplayedNotes = displayedNotes.filter((note) => selectedIds.includes(note.id));
+          const copyFeedback = copyFeedbackByMr[mr.id];
+          return (
+            <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
+              <div className="linear-item mr-item-trigger">
               {isApproved ? (
                 <Popover>
                   <Popover.Trigger aria-label={`MR !${mr.iid} approved`}>
@@ -491,10 +493,10 @@ export function MrList({
                   </Popover.Dialog>
                 </Popover.Content>
               </Popover>
-            </div>
+              </div>
 
-            {isExpanded && (
-              <div className="mr-comments-panel">
+              {isExpanded && (
+                <div className="mr-comments-panel">
                 {isLoadingComments ? (
                   <div className="flex flex-col gap-1.5 px-2 pb-2">
                     <Skeleton className="h-10 rounded-lg" />
@@ -745,11 +747,12 @@ export function MrList({
                     )}
                   </>
                 )}
-              </div>
-            )}
-          </div>
-        );
-      })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </ScrollArea>
     </div>
   );
 }
