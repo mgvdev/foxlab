@@ -131,7 +131,7 @@ export function TrayPopover({
     <main className="menubar-root">
       <header className="menubar-header">
         <div className="menubar-title">
-          <p className="menubar-title-main">GitLab Companion</p>
+          <p className="menubar-title-main">Foxlab</p>
           <p className="menubar-title-sub">
             {snapshot.lastSyncAt
               ? `Sync ${new Date(snapshot.lastSyncAt).toLocaleTimeString()}`

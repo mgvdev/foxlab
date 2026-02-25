@@ -32,7 +32,7 @@ async function openOrFocusWindow(
 export async function openSettingsWindow(): Promise<void> {
   await openOrFocusWindow(SETTINGS_WINDOW_LABEL, {
     url: "/#settings",
-    title: "GitLab Companion — Settings",
+    title: "Foxlab — Settings",
     width: 520,
     height: 700,
     minWidth: 520,
@@ -48,7 +48,7 @@ export async function openSettingsWindow(): Promise<void> {
 export async function openStatsWindow(payload?: StatsFocusTicketPayload): Promise<void> {
   await openOrFocusWindow(STATS_WINDOW_LABEL, {
     url: "/#stats",
-    title: "GitLab Companion — Stats",
+    title: "Foxlab — Stats",
     width: 860,
     height: 700,
     minWidth: 760,
@@ -64,4 +64,3 @@ export async function openStatsWindow(payload?: StatsFocusTicketPayload): Promis
     await WebviewWindow.getCurrent().emitTo(STATS_WINDOW_LABEL, "stats:focus-ticket", payload);
   }
 }
-
