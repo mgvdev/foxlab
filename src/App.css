@@ -210,6 +210,41 @@ body {
   border-radius: 18px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transform-origin: top center;
+  will-change: transform, opacity;
+}
+
+@keyframes menubar-enter {
+  from {
+    transform: translateY(-6px) scale(0.995);
+    opacity: 0.92;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes menubar-exit {
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-6px) scale(0.995);
+    opacity: 0.94;
+  }
+}
+
+.menubar-root.is-entering {
+  animation: menubar-enter 140ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.menubar-root.is-exiting {
+  animation: menubar-exit 120ms cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none;
 }
 
 .menubar-header {
@@ -1607,6 +1642,17 @@ body {
   font-size: 12px;
   color: var(--ui-muted-fg);
   background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menubar-root {
+    will-change: auto;
+  }
+
+  .menubar-root.is-entering,
+  .menubar-root.is-exiting {
+    animation: none;
+  }
 }
 
 .stats-window {
