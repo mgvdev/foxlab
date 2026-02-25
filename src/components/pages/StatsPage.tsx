@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@heroui/react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
+
+import { Button } from "@/components/ui/button";
+import { CycleInfoBlock } from "@/components/organisms/stats/CycleInfoBlock";
+import { KpiGrid } from "@/components/organisms/stats/KpiGrid";
+import { TicketStatsList } from "@/components/organisms/stats/TicketStatsList";
+import { SecondaryWindowTemplate } from "@/components/templates/SecondaryWindowTemplate";
 import { fetchAssignedTickets, fetchTicketLabelEvents, type TicketLabelEvent } from "@/lib/gitlab";
 import { loadSettings } from "@/lib/store";
 import type { Settings, TicketItem } from "@/lib/types";
@@ -288,130 +293,53 @@ export function StatsPage() {
     settings?.cycleStartLabel.trim() !== settings?.cycleEndLabel.trim();
 
   return (
-    <main className="window-shell">
-      <section className="window-card stats-window">
-        <header className="window-head">
-          <div>
-            <h1 className="window-title">Stats Time Tracking</h1>
-            <p className="window-subtitle">
-              Tickets assignés, estimation, overrun, et cycle label-based.
-            </p>
-          </div>
-          <div className="window-actions-inline">
-            <Button size="sm" variant="secondary" onPress={() => void openSettingsWindow()}>
-              Settings
-            </Button>
-            <Button size="sm" variant="secondary" onPress={() => void loadStats()}>
-              {isLoading ? "..." : "↻"}
-            </Button>
-            <Button size="sm" variant="secondary" onPress={() => void getCurrentWebviewWindow().close()}>
-              Fermer
-            </Button>
-          </div>
-        </header>
+    <SecondaryWindowTemplate className="stats-window">
+      <header className="window-head">
+        <div>
+          <h1 className="window-title">Stats Time Tracking</h1>
+          <p className="window-subtitle">
+            Tickets assignés, estimation, overrun, et cycle label-based.
+          </p>
+        </div>
+        <div className="window-actions-inline">
+          <Button size="sm" variant="secondary" onClick={() => void openSettingsWindow()}>
+            Settings
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => void loadStats()}>
+            {isLoading ? "..." : "↻"}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => void getCurrentWebviewWindow().close()}>
+            Fermer
+          </Button>
+        </div>
+      </header>
 
-        {!settings || !hasValidSettings(settings) ? (
-          <div className="window-empty">
-            Configure l’URL GitLab et le token dans la fenêtre Settings.
-          </div>
-        ) : (
-          <>
-            <section className="stats-metrics-grid">
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Total spent</p>
-                <p className="stats-metric-value">{formatDuration(summary.totalSpentSeconds)}</p>
-              </article>
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Total estimate</p>
-                <p className="stats-metric-value">{formatDuration(summary.totalEstimateSeconds)}</p>
-              </article>
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Overrun tickets</p>
-                <p className="stats-metric-value">{summary.overrunCount}</p>
-              </article>
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Tickets with estimate</p>
-                <p className="stats-metric-value">
-                  {summary.ticketsWithEstimate} / {tickets.length}
-                </p>
-              </article>
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Cycle time cumulé</p>
-                <p className="stats-metric-value">{formatDuration(summary.totalCycleSeconds)}</p>
-              </article>
-              <article className="stats-metric-card">
-                <p className="stats-metric-label">Cycles</p>
-                <p className="stats-metric-value">
-                  {summary.completedCycleCount} done / {summary.activeCycleCount} en cours
-                </p>
-              </article>
-            </section>
+      {!settings || !hasValidSettings(settings) ? (
+        <div className="window-empty">
+          Configure l’URL GitLab et le token dans la fenêtre Settings.
+        </div>
+      ) : (
+        <>
+          <KpiGrid formatDuration={formatDuration} summary={summary} ticketsCount={tickets.length} />
 
-            {!cycleConfigured && (
-              <p className="window-status">
-                Configure `cycleStartLabel` et `cycleEndLabel` pour activer le calcul du cycle réel.
-              </p>
-            )}
+          <CycleInfoBlock cycleConfigured={cycleConfigured} />
 
-            {error && <p className="window-status window-status-error">{error}</p>}
+          {error && <p className="window-status window-status-error">{error}</p>}
 
-            <section className="stats-ticket-list">
-              {tickets.map((ticket) => {
-                const key = ticketKey(ticket);
-                const cycleStats = cycleStatsByTicket[key];
-                const isFocused = focusedTicketKey === key;
-                const ratio =
-                  ticket.timeEstimateSeconds > 0
-                    ? ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds
-                    : 0;
-                const percent = ticket.timeEstimateSeconds > 0 ? Math.round(ratio * 100) : 0;
-
-                return (
-                  <article
-                    key={key}
-                    ref={(node) => {
-                      ticketRefs.current[key] = node;
-                    }}
-                    className={`stats-ticket-row ${isFocused ? "is-focused" : ""}`}
-                  >
-                    <div className="stats-ticket-head">
-                      <button
-                        className="stats-ticket-title"
-                        type="button"
-                        onClick={() => void openUrl(ticket.webUrl)}
-                      >
-                        #{ticket.iid} · {ticket.title}
-                      </button>
-                      <span className="stats-ticket-meta">{ticket.state}</span>
-                    </div>
-
-                    <div className="stats-ticket-values">
-                      <span>Spent {ticket.humanTotalTimeSpent || "0m"}</span>
-                      <span>/</span>
-                      <span>Est. {ticket.timeEstimateSeconds > 0 ? ticket.humanTimeEstimate : "No estimate"}</span>
-                      {ticket.timeEstimateSeconds > 0 && <span>({percent}%)</span>}
-                    </div>
-
-                    {cycleConfigured && (
-                      <div className="stats-ticket-values">
-                        <span>Cycle done {formatDuration(cycleStats?.totalSeconds ?? 0)}</span>
-                        <span>/</span>
-                        <span>In progress {formatDuration(cycleStats?.inProgressSeconds ?? 0)}</span>
-                      </div>
-                    )}
-
-                    <div className="stats-ticket-actions">
-                      <Button size="sm" variant="secondary" onPress={() => void openUrl(ticket.webUrl)}>
-                        Open
-                      </Button>
-                    </div>
-                  </article>
-                );
-              })}
-            </section>
-          </>
-        )}
-      </section>
-    </main>
+          <TicketStatsList
+            cycleConfigured={cycleConfigured}
+            cycleStatsByTicket={cycleStatsByTicket}
+            focusedTicketKey={focusedTicketKey}
+            formatDuration={formatDuration}
+            ticketKey={ticketKey}
+            ticketRefs={ticketRefs}
+            tickets={tickets}
+            onOpen={(url) => {
+              void openUrl(url);
+            }}
+          />
+        </>
+      )}
+    </SecondaryWindowTemplate>
   );
 }
