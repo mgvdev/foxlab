@@ -76,30 +76,60 @@ function ciIconByStatus(status: string): string {
   return "•";
 }
 
-function formatDiscussionReferenceLabel(note: MergeRequestDiscussionNote): string {
-  if (!note.reference) {
-    return "Général";
+function shrinkPath(path: string, keepSegments = 2): string {
+  const normalized = path.replaceAll("\\", "/");
+  const segments = normalized.split("/").filter(Boolean);
+
+  if (segments.length <= keepSegments) {
+    return normalized;
   }
 
+  return `…/${segments.slice(-keepSegments).join("/")}`;
+}
+
+function formatLineSuffix(note: MergeRequestDiscussionNote): string {
   const reference = note.reference;
-  const file =
-    reference.oldPath && reference.newPath && reference.oldPath !== reference.newPath
-      ? `${reference.oldPath} -> ${reference.newPath}`
-      : reference.filePath ?? "fichier inconnu";
+  if (!reference) {
+    return "";
+  }
 
   if (
     reference.lineRangeStart &&
     reference.lineRangeEnd &&
     reference.lineRangeStart !== reference.lineRangeEnd
   ) {
-    return `${file}:${reference.lineRangeStart}-${reference.lineRangeEnd}`;
+    return `:${reference.lineRangeStart}-${reference.lineRangeEnd}`;
   }
 
   if (reference.line) {
-    return `${file}:${reference.line}`;
+    return `:${reference.line}`;
   }
 
-  return file;
+  return "";
+}
+
+function extractReferencePath(note: MergeRequestDiscussionNote): { fullPath: string; shortPath: string } | null {
+  const reference = note.reference;
+  if (!reference) {
+    return null;
+  }
+
+  if (reference.oldPath && reference.newPath && reference.oldPath !== reference.newPath) {
+    return {
+      fullPath: `${reference.oldPath} -> ${reference.newPath}`,
+      shortPath: `${shrinkPath(reference.oldPath)} -> ${shrinkPath(reference.newPath)}`,
+    };
+  }
+
+  const singlePath = reference.filePath ?? reference.newPath ?? reference.oldPath;
+  if (!singlePath) {
+    return null;
+  }
+
+  return {
+    fullPath: singlePath,
+    shortPath: shrinkPath(singlePath),
+  };
 }
 
 async function writeToClipboard(value: string): Promise<void> {
@@ -308,6 +338,67 @@ export function MrList({
         [mr.id]: error instanceof Error ? error.message : "Impossible de copier le prompt",
       }));
     }
+  };
+
+  const copyReferencePath = async (mrId: number, path: string) => {
+    try {
+      await writeToClipboard(path);
+      setCopyFeedbackByMr((current) => ({
+        ...current,
+        [mrId]: "Chemin copié",
+      }));
+    } catch (error) {
+      setCopyFeedbackByMr((current) => ({
+        ...current,
+        [mrId]: error instanceof Error ? error.message : "Impossible de copier le chemin",
+      }));
+    }
+  };
+
+  const renderReference = (mrId: number, note: MergeRequestDiscussionNote) => {
+    const referencePath = extractReferencePath(note);
+    const lineSuffix = formatLineSuffix(note);
+
+    if (!referencePath) {
+      return (
+        <p className="mr-comment-ref">
+          {lineSuffix ? `Ligne ${lineSuffix.slice(1)}` : "Commentaire général"}
+        </p>
+      );
+    }
+
+    return (
+      <div className="mr-comment-ref-row">
+        <Popover>
+          <Popover.Trigger aria-label="Voir le chemin complet">
+            <button className="mr-comment-ref mr-comment-ref-trigger" type="button">
+              <span>{referencePath.shortPath}</span>
+              {lineSuffix && <span>{lineSuffix}</span>}
+            </button>
+          </Popover.Trigger>
+          <Popover.Content className="mr-path-popover">
+            <Popover.Dialog>
+              <Popover.Heading className="mr-path-popover-title">Chemin complet</Popover.Heading>
+              <p className="mr-path-popover-value">
+                {referencePath.fullPath}
+                {lineSuffix}
+              </p>
+            </Popover.Dialog>
+          </Popover.Content>
+        </Popover>
+        <button
+          aria-label="Copier le chemin"
+          className="mr-comment-ref-copy"
+          type="button"
+          onClick={() => void copyReferencePath(mrId, referencePath.fullPath)}
+        >
+          <svg className="mr-comment-ref-copy-icon" viewBox="0 0 20 20" aria-hidden="true">
+            <rect x="7" y="3.5" width="9" height="11" rx="1.7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M4.5 14V6.8a1.8 1.8 0 0 1 1.8-1.8h6.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+    );
   };
 
   const mutedSet = useMemo(() => new Set(mutedMrIids), [mutedMrIids]);
@@ -670,11 +761,7 @@ export function MrList({
                                     </button>
                                   </div>
                                 </div>
-                                {thread.root.reference && (
-                                  <p className="mr-comment-ref">
-                                    {formatDiscussionReferenceLabel(thread.root)}
-                                  </p>
-                                )}
+                                {thread.root.reference && renderReference(mr.id, thread.root)}
                                 <p className="mr-comment-body">{thread.root.body || "(sans contenu)"}</p>
                                 {hasReplies && (
                                   <div className="mr-thread-toggle-row">
@@ -732,9 +819,7 @@ export function MrList({
                                           </button>
                                         </div>
                                       </div>
-                                      {note.reference && (
-                                        <p className="mr-comment-ref">{formatDiscussionReferenceLabel(note)}</p>
-                                      )}
+                                      {note.reference && renderReference(mr.id, note)}
                                       <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
                                     </div>
                                   ))}

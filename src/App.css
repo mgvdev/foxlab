@@ -1257,6 +1257,79 @@ body {
   word-break: break-word;
 }
 
+.mr-comment-ref-row {
+  margin-top: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.mr-comment-ref-trigger {
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--ui-muted-fg);
+  font-size: 10px;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  cursor: pointer;
+}
+
+.mr-comment-ref-trigger:hover {
+  text-decoration: underline;
+}
+
+.mr-comment-ref-copy {
+  width: 24px;
+  height: 18px;
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 82%, transparent 18%);
+  border-radius: 999px;
+  padding: 0;
+  background: color-mix(in oklab, var(--ui-surface) 74%, transparent 26%);
+  color: var(--ui-fg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mr-comment-ref-copy:hover {
+  background: color-mix(in oklab, var(--ui-surface-hover) 78%, transparent 22%);
+}
+
+.mr-comment-ref-copy-icon {
+  width: 11px;
+  height: 11px;
+}
+
+.mr-path-popover {
+  width: min(340px, calc(100vw - 44px));
+}
+
+.mr-path-popover-title {
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.mr-path-popover-value {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .mr-thread-toggle-row {
   margin-top: 4px;
 }
