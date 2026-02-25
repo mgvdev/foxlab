@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
+import { type ActiveTab } from "@/components/organisms/TrayPopover";
+import { MainWindowPage } from "@/components/pages/MainWindowPage";
 import { SettingsPage } from "@/components/pages/SettingsPage";
 import { StatsPage } from "@/components/pages/StatsPage";
-import { TrayPopover, type ActiveTab } from "@/components/organisms/TrayPopover";
 import {
   addTicketSpentTime,
   fetchMergeRequestCiStatus,
@@ -317,7 +318,7 @@ function MainWindowApp() {
 
   return (
     <>
-      <TrayPopover
+      <MainWindowPage
         activeTab={activeTab}
         isRefreshing={isRefreshing}
         loading={isLoading}
