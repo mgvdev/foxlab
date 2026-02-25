@@ -52,21 +52,21 @@
   --ui-muted-fg: var(--muted-foreground);
   --ui-card-bg: var(--card);
   --ui-card-border: var(--border);
-  --ui-surface: var(--secondary);
-  --ui-surface-hover: var(--muted);
-  --ui-input-bg: var(--background);
-  --ui-input-border: var(--input);
+  --ui-surface: color-mix(in oklab, var(--card) 76%, var(--muted) 24%);
+  --ui-surface-hover: color-mix(in oklab, var(--card) 55%, var(--muted) 45%);
+  --ui-input-bg: color-mix(in oklab, var(--background) 82%, var(--card) 18%);
+  --ui-input-border: color-mix(in oklab, var(--input) 74%, var(--border) 26%);
   --ui-input-fg: var(--foreground);
   --ui-input-placeholder: var(--muted-foreground);
   --ui-ring: var(--ring);
   --ui-accent: var(--primary);
-  --ui-accent-hover: color-mix(in oklab, var(--primary) 88%, black 12%);
+  --ui-accent-hover: color-mix(in oklab, var(--primary) 82%, var(--foreground) 18%);
   --ui-accent-fg: var(--primary-foreground);
   --ui-popover-bg: var(--popover);
   --ui-popover-border: var(--border);
-  --ui-tooltip-bg: color-mix(in oklab, var(--foreground) 88%, black 12%);
-  --ui-tooltip-fg: var(--background);
-  --ui-skeleton: color-mix(in oklab, var(--muted) 88%, white 12%);
+  --ui-tooltip-bg: color-mix(in oklab, var(--background) 28%, var(--foreground) 72%);
+  --ui-tooltip-fg: var(--card);
+  --ui-skeleton: color-mix(in oklab, var(--muted) 82%, var(--card) 18%);
 
   color: var(--foreground);
   background: var(--background);
@@ -193,7 +193,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: color-mix(in srgb, var(--ui-surface) 78%, #fff 22%);
+  background: color-mix(in oklab, var(--background) 88%, var(--card) 12%);
   color: var(--ui-fg);
 }
 
@@ -347,11 +347,7 @@ body {
 }
 
 .mr-accordion-item {
-  border-bottom: 1px solid rgba(30, 48, 70, 0.1);
-}
-
-:root[data-theme="dark"] .mr-accordion-item {
-  border-bottom-color: #1a2332;
+  border-bottom: 1px solid color-mix(in oklab, var(--ui-card-border) 72%, transparent 28%);
 }
 
 .mr-accordion-item:last-child {
@@ -375,13 +371,9 @@ body {
 }
 
 .ticket-item-row {
-  border-bottom: 1px solid rgba(30, 48, 70, 0.1);
+  border-bottom: 1px solid color-mix(in oklab, var(--ui-card-border) 72%, transparent 28%);
   display: block;
   cursor: default;
-}
-
-:root[data-theme="dark"] .ticket-item-row {
-  border-bottom-color: #151920;
 }
 
 .ticket-toggle-btn {
@@ -416,11 +408,7 @@ body {
 }
 
 .ticket-toggle-btn:hover .ticket-head-meta {
-  color: #7f93aa;
-}
-
-:root[data-theme="dark"] .ticket-toggle-btn:hover .ticket-head-meta {
-  color: #a7b9cf;
+  color: var(--ui-fg);
 }
 
 .ticket-actions {
@@ -440,11 +428,7 @@ body {
 .ticket-accordion-panel {
   margin-top: 7px;
   padding: 7px 8px 0;
-  border-top: 1px solid rgba(30, 48, 70, 0.08);
-}
-
-:root[data-theme="dark"] .ticket-accordion-panel {
-  border-top-color: #131821;
+  border-top: 1px solid color-mix(in oklab, var(--ui-card-border) 66%, transparent 34%);
 }
 
 .ticket-time-inline {
@@ -1527,13 +1511,8 @@ body {
   padding: 7px 8px;
   border-radius: 8px;
   font-size: 11px;
-  color: #29434e;
-  background: rgba(186, 223, 224, 0.45);
-}
-
-:root[data-theme="dark"] .settings-hint {
-  color: #dce9ee;
-  background: rgba(58, 82, 96, 0.36);
+  color: var(--ui-muted-fg);
+  background: color-mix(in oklab, var(--ui-surface) 72%, transparent 28%);
 }
 
 .window-shell {
@@ -1541,26 +1520,17 @@ body {
   width: 100%;
   min-height: 100vh;
   padding: 14px;
-  background: #f3f6fa;
-}
-
-:root[data-theme="dark"] .window-shell {
-  background: #010204;
+  background: color-mix(in oklab, var(--background) 90%, var(--card) 10%);
 }
 
 .window-card {
   box-sizing: border-box;
   width: 100%;
   border-radius: 12px;
-  border: 1px solid rgba(27, 44, 66, 0.12);
-  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 82%, transparent 18%);
+  background: color-mix(in oklab, var(--ui-card-bg) 92%, var(--background) 8%);
   color: inherit;
   padding: 12px;
-}
-
-:root[data-theme="dark"] .window-card {
-  border-color: #1a2029;
-  background: #090d13;
 }
 
 .window-head {
@@ -1579,11 +1549,7 @@ body {
 .window-subtitle {
   margin: 3px 0 0;
   font-size: 11px;
-  color: #5d728a;
-}
-
-:root[data-theme="dark"] .window-subtitle {
-  color: #8ea3bd;
+  color: var(--ui-muted-fg);
 }
 
 .window-form {
@@ -1609,11 +1575,7 @@ body {
 .window-status {
   margin: 10px 0 0;
   font-size: 11px;
-  color: #56708e;
-}
-
-:root[data-theme="dark"] .window-status {
-  color: #9bb2cc;
+  color: var(--ui-muted-fg);
 }
 
 .window-status-error {
@@ -1623,17 +1585,11 @@ body {
 .window-empty {
   margin-top: 12px;
   border-radius: 9px;
-  border: 1px solid rgba(27, 44, 66, 0.12);
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 80%, transparent 20%);
   padding: 12px;
   font-size: 12px;
-  color: #5b6d82;
-  background: rgba(245, 249, 252, 0.7);
-}
-
-:root[data-theme="dark"] .window-empty {
-  border-color: #1f2937;
-  color: #95abc5;
-  background: #0d141f;
+  color: var(--ui-muted-fg);
+  background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
 }
 
 .stats-window {
@@ -1651,24 +1607,15 @@ body {
 
 .stats-metric-card {
   border-radius: 9px;
-  border: 1px solid rgba(27, 44, 66, 0.11);
-  background: rgba(243, 248, 253, 0.78);
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 80%, transparent 20%);
+  background: color-mix(in oklab, var(--ui-card-bg) 88%, var(--ui-surface) 12%);
   padding: 8px 9px;
-}
-
-:root[data-theme="dark"] .stats-metric-card {
-  border-color: #1f2833;
-  background: #0d141f;
 }
 
 .stats-metric-label {
   margin: 0;
   font-size: 10px;
-  color: #68809d;
-}
-
-:root[data-theme="dark"] .stats-metric-label {
-  color: #93abca;
+  color: var(--ui-muted-fg);
 }
 
 .stats-metric-value {
@@ -1682,42 +1629,27 @@ body {
   flex: 1;
   overflow-y: auto;
   border-radius: 10px;
-  border: 1px solid rgba(27, 44, 66, 0.12);
-  background: rgba(248, 252, 255, 0.74);
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 80%, transparent 20%);
+  background: color-mix(in oklab, var(--ui-card-bg) 86%, var(--background) 14%);
   padding: 8px;
   display: flex;
   flex-direction: column;
   gap: 7px;
 }
 
-:root[data-theme="dark"] .stats-ticket-list {
-  border-color: #202937;
-  background: #060a10;
-}
-
 .stats-ticket-row {
   border-radius: 8px;
-  border: 1px solid rgba(27, 44, 66, 0.1);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
+  background: color-mix(in oklab, var(--ui-card-bg) 92%, var(--background) 8%);
   padding: 8px 9px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-:root[data-theme="dark"] .stats-ticket-row {
-  border-color: #1f2a39;
-  background: #0a111a;
-}
-
 .stats-ticket-row.is-focused {
-  border-color: #4a78a8;
-  box-shadow: 0 0 0 1px rgba(74, 120, 168, 0.32);
-}
-
-:root[data-theme="dark"] .stats-ticket-row.is-focused {
-  border-color: #6ea2d7;
-  box-shadow: 0 0 0 1px rgba(110, 162, 215, 0.42);
+  border-color: var(--ui-ring);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--ui-ring) 42%, transparent 58%);
 }
 
 .stats-ticket-head {
@@ -1750,11 +1682,7 @@ body {
 .stats-ticket-meta {
   flex-shrink: 0;
   font-size: 10px;
-  color: #6d839f;
-}
-
-:root[data-theme="dark"] .stats-ticket-meta {
-  color: #8fa6c2;
+  color: var(--ui-muted-fg);
 }
 
 .stats-ticket-values {
@@ -1762,12 +1690,8 @@ body {
   align-items: center;
   gap: 5px;
   font-size: 11px;
-  color: #56708d;
+  color: var(--ui-muted-fg);
   flex-wrap: wrap;
-}
-
-:root[data-theme="dark"] .stats-ticket-values {
-  color: #9fb7d3;
 }
 
 .stats-ticket-actions {
