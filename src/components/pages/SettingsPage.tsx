@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button, ButtonGroup, Input, Label, TextField } from "@heroui/react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-import { testGitLabConnection } from "../lib/gitlab";
-import { loadSettings, saveSettings } from "../lib/store";
-import type { PollIntervalMinutes, Settings, ThemeMode } from "../lib/types";
+import { testGitLabConnection } from "@/lib/gitlab";
+import { loadSettings, saveSettings } from "@/lib/store";
+import type { PollIntervalMinutes, Settings, ThemeMode } from "@/lib/types";
 
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
@@ -16,7 +16,7 @@ function parseMutedIids(raw: string): number[] {
     .filter((value) => Number.isInteger(value) && value > 0);
 }
 
-export function SettingsWindow() {
+export function SettingsPage() {
   const [draft, setDraft] = useState<Settings | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -204,4 +204,3 @@ export function SettingsWindow() {
     </main>
   );
 }
-

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { SettingsWindow } from "./components/SettingsWindow";
-import { StatsWindow } from "./components/StatsWindow";
-import { TrayPopover, type ActiveTab } from "./components/TrayPopover";
+import { SettingsPage } from "@/components/pages/SettingsPage";
+import { StatsPage } from "@/components/pages/StatsPage";
+import { TrayPopover, type ActiveTab } from "@/components/organisms/TrayPopover";
 import {
   addTicketSpentTime,
   fetchMergeRequestCiStatus,
@@ -362,11 +362,11 @@ function App() {
   const windowLabel = useMemo(() => resolveWindowLabel(), []);
 
   if (windowLabel === "settings") {
-    return <SettingsWindow />;
+    return <SettingsPage />;
   }
 
   if (windowLabel === "stats") {
-    return <StatsWindow />;
+    return <StatsPage />;
   }
 
   return <MainWindowApp />;

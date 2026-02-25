@@ -1,6 +1,6 @@
 import { Button, Card, Popover, Skeleton } from "@heroui/react";
 import { useState, type CSSProperties } from "react";
-import type { TicketItem } from "../lib/types";
+import type { TicketItem } from "@/lib/types";
 
 interface TicketListProps {
   tickets: TicketItem[];

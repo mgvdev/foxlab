@@ -8,7 +8,7 @@ import type {
   MergeRequestDiscussionNote,
   MergeRequestItem,
   TicketItem,
-} from "../lib/types";
+} from "@/lib/types";
 
 export type ActiveTab = "comments" | "mrs" | "tickets";
 

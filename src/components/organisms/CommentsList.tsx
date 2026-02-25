@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Card, Skeleton } from "@heroui/react";
-import type { CommentItem } from "../lib/types";
-import { buildCommentsCorrectionPrompt } from "../lib/mrPrompt";
+import type { CommentItem } from "@/lib/types";
+import { buildCommentsCorrectionPrompt } from "@/lib/mrPrompt";
 
 interface CommentsListProps {
   comments: CommentItem[];

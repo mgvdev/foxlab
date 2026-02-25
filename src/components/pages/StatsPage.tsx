@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@heroui/react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { fetchAssignedTickets, fetchTicketLabelEvents, type TicketLabelEvent } from "../lib/gitlab";
-import { loadSettings } from "../lib/store";
-import type { Settings, TicketItem } from "../lib/types";
-import { openSettingsWindow, type StatsFocusTicketPayload } from "../lib/windows";
+import { fetchAssignedTickets, fetchTicketLabelEvents, type TicketLabelEvent } from "@/lib/gitlab";
+import { loadSettings } from "@/lib/store";
+import type { Settings, TicketItem } from "@/lib/types";
+import { openSettingsWindow, type StatsFocusTicketPayload } from "@/lib/windows";
 
 interface TicketCycleStats {
   completedCycles: number;
@@ -119,7 +119,7 @@ function ticketKey(ticket: TicketItem): string {
   return `${ticket.projectId}:${ticket.iid}`;
 }
 
-export function StatsWindow() {
+export function StatsPage() {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [cycleStatsByTicket, setCycleStatsByTicket] = useState<Record<string, TicketCycleStats>>(

@@ -4,8 +4,8 @@ import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,
   MergeRequestItem,
-} from "../lib/types";
-import { buildMrCorrectionPrompt } from "../lib/mrPrompt";
+} from "@/lib/types";
+import { buildMrCorrectionPrompt } from "@/lib/mrPrompt";
 
 interface MrListProps {
   mrs: MergeRequestItem[];
