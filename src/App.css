@@ -1588,3 +1588,100 @@ body {
   align-items: center;
   justify-content: flex-end;
 }
+
+/* Deep black compact overrides */
+:root[data-theme="dark"] {
+  color: #e8ebef;
+  background: #010101;
+}
+
+:root[data-theme="dark"] .menubar-root {
+  background: #030405;
+}
+
+:root[data-theme="dark"] .segment-switch {
+  border-color: #1b1f26;
+  background: #050608;
+}
+
+:root[data-theme="dark"] .segment-btn {
+  color: #9aa3b1;
+}
+
+:root[data-theme="dark"] .segment-btn.is-active {
+  color: #f6f8fb;
+  background: #121418;
+}
+
+:root[data-theme="dark"] .linear-list {
+  border-color: #1d222b;
+  background: #06080a;
+}
+
+:root[data-theme="dark"] .linear-item {
+  border-bottom-color: #1a1f27;
+  background: rgba(255, 255, 255, 0.008);
+}
+
+:root[data-theme="dark"] .linear-item:hover {
+  background: #111418;
+}
+
+:root[data-theme="dark"] .mr-accordion-item {
+  border-bottom-color: #1a1f27;
+}
+
+:root[data-theme="dark"] .mr-comments-panel {
+  border-left-color: #242b36;
+}
+
+:root[data-theme="dark"] .mr-ci-panel {
+  background: #0b0f14;
+  border: 1px solid #1d2430;
+}
+
+:root[data-theme="dark"] .mr-comment-item {
+  background: #0a1017;
+  border: 1px solid #1b2230;
+}
+
+:root[data-theme="dark"] .mr-comment-item:hover {
+  background: #101823;
+}
+
+:root[data-theme="dark"] .mr-comment-item--reply {
+  background: #080d13;
+  border-color: #19202d;
+}
+
+:root[data-theme="dark"] .ticket-item-row {
+  border-bottom-color: #1a1f27;
+}
+
+:root[data-theme="dark"] .ticket-accordion-panel {
+  border-top-color: #1a1f27;
+}
+
+:root[data-theme="dark"] .window-shell {
+  background: #020304;
+}
+
+:root[data-theme="dark"] .window-card {
+  border-color: #1d222a;
+  background: #07090c;
+}
+
+:root[data-theme="dark"] .stats-metric-card {
+  border-color: #20252e;
+  background: #0a0d12;
+}
+
+:root[data-theme="dark"] .stats-ticket-list {
+  border-color: #1f252e;
+  background: #040608;
+}
+
+:root[data-theme="dark"] .stats-ticket-row {
+  border-color: #1f252f;
+  background: #080c11;
+}
