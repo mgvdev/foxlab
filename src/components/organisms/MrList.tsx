@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Button, Card, Chip, Popover, Skeleton, Tooltip } from "@heroui/react";
+import { Button, Card, Chip, Popover, Skeleton, Tooltip } from "@/components/ui/legacy";
 import type {
   MergeRequestCiStatus,
   MergeRequestDiscussionNote,

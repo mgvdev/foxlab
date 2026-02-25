@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card, Skeleton } from "@heroui/react";
+import { Button, Card, Skeleton } from "@/components/ui/legacy";
 import type { CommentItem } from "@/lib/types";
 import { buildCommentsCorrectionPrompt } from "@/lib/mrPrompt";
 

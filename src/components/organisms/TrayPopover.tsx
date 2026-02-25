@@ -1,4 +1,4 @@
-import { Button, Chip } from "@heroui/react";
+import { Button, Chip } from "@/components/ui/legacy";
 import { CommentsList } from "./CommentsList";
 import { MrList } from "./MrList";
 import { TicketList } from "./TicketList";

@@ -1,4 +1,4 @@
-import { Button, Card, Popover, Skeleton } from "@heroui/react";
+import { Button, Card, Popover, Skeleton } from "@/components/ui/legacy";
 import { useState, type CSSProperties } from "react";
 import type { TicketItem } from "@/lib/types";
 
