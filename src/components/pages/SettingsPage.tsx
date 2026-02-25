@@ -81,7 +81,6 @@ export function SettingsPage() {
         isTestingConnection={isTestingConnection}
         statusMessage={statusMessage}
         onChange={setDraft}
-        onClose={() => void getCurrentWebviewWindow().close()}
         onSave={() => void handleSave()}
         onTestConnection={() => void handleTestConnection()}
       />

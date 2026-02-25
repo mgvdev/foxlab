@@ -9,7 +9,6 @@ interface SettingsFormProps {
   isSaving: boolean;
   isTestingConnection: boolean;
   statusMessage: string | null;
-  onClose: () => void;
   onChange: (next: Settings) => void;
   onTestConnection: () => void;
   onSave: () => void;
@@ -63,7 +62,6 @@ export function SettingsForm({
   isSaving,
   isTestingConnection,
   statusMessage,
-  onClose,
   onChange,
   onTestConnection,
   onSave,
@@ -75,9 +73,6 @@ export function SettingsForm({
           <h1 className="window-title">Réglages GitLab</h1>
           <p className="window-subtitle">Configuration de l’app, synchro et métriques.</p>
         </div>
-        <Button size="sm" variant="secondary" onClick={onClose}>
-          Fermer
-        </Button>
       </header>
 
       <div className="window-form">
