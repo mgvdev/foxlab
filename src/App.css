@@ -1571,14 +1571,15 @@ body {
   box-sizing: border-box;
   width: 100%;
   min-height: 100vh;
-  padding: 14px;
+  padding: 0;
   background: color-mix(in oklab, var(--background) 90%, var(--card) 10%);
 }
 
 .window-card {
   box-sizing: border-box;
   width: 100%;
-  border-radius: 12px;
+  min-height: 100vh;
+  border-radius: 0;
   border: 1px solid color-mix(in oklab, var(--ui-card-border) 82%, transparent 18%);
   background: color-mix(in oklab, var(--ui-card-bg) 92%, var(--background) 8%);
   color: inherit;
@@ -1644,63 +1645,138 @@ body {
   background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
 }
 
-.prefs-shell {
-  width: 100%;
-  min-height: 100vh;
-  padding: 12px;
-  background: transparent;
+.settings-window {
+  padding: 0;
 }
 
-.prefs-window {
-  width: 100%;
-  min-height: calc(100vh - 24px);
-  border-radius: 18px;
-  border: 1px solid color-mix(in oklab, var(--ui-card-border) 74%, transparent 26%);
-  background: color-mix(in oklab, var(--ui-card-bg) 90%, var(--background) 10%);
-  box-shadow: var(--shadow-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+.prefs-layout {
+  height: 100%;
+  min-height: calc(100vh - 26px);
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
 }
 
-.prefs-titlebar {
-  min-height: 42px;
-  border-bottom: 1px solid color-mix(in oklab, var(--ui-card-border) 74%, transparent 26%);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.prefs-sidebar {
+  border-right: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
   background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
+  padding: 14px 10px;
 }
 
-.prefs-titlebar-drag {
-  min-height: 42px;
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 10px;
-}
-
-.prefs-titlebar-title {
-  margin: 0;
-  font-size: 13px;
+.prefs-sidebar-label {
+  margin: 0 0 10px;
+  padding: 0 6px;
+  font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--ui-muted-fg);
 }
 
-.prefs-close-btn {
-  width: 28px;
-  height: 28px;
-  margin-right: 7px;
-  border: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
-  border-radius: 8px;
-  background: color-mix(in oklab, var(--ui-surface) 80%, transparent 20%);
-  color: var(--ui-fg);
+.prefs-sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prefs-sidebar-item {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ui-muted-fg);
+  text-align: left;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
   cursor: pointer;
 }
 
-.prefs-close-btn:hover {
-  background: color-mix(in oklab, var(--ui-surface-hover) 84%, transparent 16%);
+.prefs-sidebar-item:hover {
+  background: color-mix(in oklab, var(--ui-surface-hover) 74%, transparent 26%);
+}
+
+.prefs-sidebar-item.is-active {
+  border-color: color-mix(in oklab, var(--ui-ring) 56%, var(--ui-card-border) 44%);
+  background: color-mix(in oklab, var(--ui-card-bg) 94%, var(--ui-surface) 6%);
+  color: var(--ui-fg);
+}
+
+.prefs-sidebar-item-title {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.prefs-sidebar-item-subtitle {
+  font-size: 10px;
+}
+
+.prefs-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.prefs-panel-head {
+  margin: 0;
+}
+
+.prefs-panel-title {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.prefs-panel-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ui-muted-fg);
+}
+
+.prefs-panel-content {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.prefs-option-segment {
+  display: grid;
+  gap: 6px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in oklab, var(--ui-input-border) 84%, transparent 16%);
+  background: color-mix(in oklab, var(--ui-surface) 76%, transparent 24%);
+  padding: 4px;
+}
+
+.prefs-option-btn {
+  height: 31px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ui-muted-fg);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.prefs-option-btn:hover {
+  background: color-mix(in oklab, var(--ui-surface-hover) 78%, transparent 22%);
+}
+
+.prefs-option-btn.is-active {
+  border-color: color-mix(in oklab, var(--ui-ring) 56%, var(--ui-card-border) 44%);
+  background: color-mix(in oklab, var(--ui-card-bg) 92%, var(--ui-surface) 8%);
+  color: var(--ui-fg);
+}
+
+.prefs-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1711,6 +1787,27 @@ body {
   .menubar-root.is-entering,
   .menubar-root.is-exiting {
     animation: none;
+  }
+}
+
+@media (max-width: 920px) {
+  .prefs-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .prefs-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
+  }
+
+  .prefs-sidebar-menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .prefs-sidebar-item {
+    width: auto;
+    min-width: 160px;
   }
 }
 

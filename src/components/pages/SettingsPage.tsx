@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
 import { SettingsForm, type SettingsCategory } from "@/components/organisms/settings/SettingsForm";
+import { SecondaryWindowTemplate } from "@/components/templates/SecondaryWindowTemplate";
 import { testGitLabConnection } from "@/lib/gitlab";
 import { loadSettings, saveSettings } from "@/lib/store";
 import { applyThemeMode } from "@/lib/theme";
@@ -65,55 +66,27 @@ export function SettingsPage() {
     }
   };
 
-  const handleCloseWindow = useCallback(() => {
-    void getCurrentWebviewWindow()
-      .close()
-      .catch((error) => {
-        setStatusMessage(error instanceof Error ? error.message : "Impossible de fermer la fenêtre.");
-      });
-  }, []);
-
   if (!draft) {
     return (
-      <main className="prefs-shell">
-        <section className="prefs-window">
-          <header className="prefs-titlebar">
-            <div className="prefs-titlebar-drag" data-tauri-drag-region>
-              <p className="prefs-titlebar-title">Foxlab — Preferences</p>
-            </div>
-            <button aria-label="Fermer" className="prefs-close-btn" type="button" onClick={handleCloseWindow}>
-              ✕
-            </button>
-          </header>
-          <div className="p-3 text-sm [color:var(--ui-muted-fg)]">Chargement des réglages...</div>
-        </section>
-      </main>
+      <SecondaryWindowTemplate className="settings-window">
+        <div className="p-3 text-sm [color:var(--ui-muted-fg)]">Chargement des réglages...</div>
+      </SecondaryWindowTemplate>
     );
   }
 
   return (
-    <main className="prefs-shell">
-      <section className="prefs-window">
-        <header className="prefs-titlebar">
-          <div className="prefs-titlebar-drag" data-tauri-drag-region>
-            <p className="prefs-titlebar-title">Foxlab — Preferences</p>
-          </div>
-          <button aria-label="Fermer" className="prefs-close-btn" type="button" onClick={handleCloseWindow}>
-            ✕
-          </button>
-        </header>
-        <SettingsForm
-          activeCategory={activeCategory}
-          draft={draft}
-          isSaving={isSaving}
-          isTestingConnection={isTestingConnection}
-          statusMessage={statusMessage}
-          onCategoryChange={setActiveCategory}
-          onChange={setDraft}
-          onSave={() => void handleSave()}
-          onTestConnection={() => void handleTestConnection()}
-        />
-      </section>
-    </main>
+    <SecondaryWindowTemplate className="settings-window">
+      <SettingsForm
+        activeCategory={activeCategory}
+        draft={draft}
+        isSaving={isSaving}
+        isTestingConnection={isTestingConnection}
+        statusMessage={statusMessage}
+        onCategoryChange={setActiveCategory}
+        onChange={setDraft}
+        onSave={() => void handleSave()}
+        onTestConnection={() => void handleTestConnection()}
+      />
+    </SecondaryWindowTemplate>
   );
 }

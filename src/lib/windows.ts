@@ -39,8 +39,7 @@ export async function openSettingsWindow(): Promise<void> {
     minHeight: 620,
     resizable: true,
     alwaysOnTop: false,
-    decorations: false,
-    transparent: true,
+    decorations: true,
     focus: true,
     center: true,
   });
