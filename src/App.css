@@ -1164,6 +1164,19 @@ body {
   color: #8da3bd;
 }
 
+.comments-item-body {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #4f6075;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+:root[data-theme="dark"] .comments-item-body {
+  color: #9caac0;
+}
+
 .mr-status-chip {
   font-size: 10px;
   min-height: 16px;

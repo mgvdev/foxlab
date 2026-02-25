@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Button, Card, Skeleton } from "@heroui/react";
 import type { CommentItem } from "../lib/types";
+import { buildCommentsCorrectionPrompt } from "../lib/mrPrompt";
 
 interface CommentsListProps {
   comments: CommentItem[];
@@ -35,6 +37,23 @@ function initials(name: string): string {
   return parts.map((part) => part.charAt(0).toUpperCase()).join("") || "?";
 }
 
+async function writeToClipboard(value: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = value;
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textArea);
+}
+
 export function CommentsList({
   comments,
   loading,
@@ -43,6 +62,40 @@ export function CommentsList({
   onRetry,
   showAvatars,
 }: CommentsListProps) {
+  const [selectedCommentKeys, setSelectedCommentKeys] = useState<string[]>([]);
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+
+  const allSelected = comments.length > 0 && comments.every((comment) => selectedCommentKeys.includes(comment.key));
+  const selectedComments = comments.filter((comment) => selectedCommentKeys.includes(comment.key));
+
+  const toggleSelection = (commentKey: string) => {
+    setSelectedCommentKeys((current) => {
+      const selected = new Set(current);
+      if (selected.has(commentKey)) {
+        selected.delete(commentKey);
+      } else {
+        selected.add(commentKey);
+      }
+      return [...selected];
+    });
+  };
+
+  const copyPrompt = async (source: "selection" | "all") => {
+    const target = source === "all" ? comments : selectedComments;
+    if (target.length === 0) {
+      setCopyFeedback("Aucun commentaire à copier");
+      return;
+    }
+
+    try {
+      const prompt = buildCommentsCorrectionPrompt(target);
+      await writeToClipboard(prompt);
+      setCopyFeedback(`${target.length} commentaire(s) copié(s) (${source})`);
+    } catch (error) {
+      setCopyFeedback(error instanceof Error ? error.message : "Impossible de copier le prompt");
+    }
+  };
+
   if (loading) {
     return <LoadingState />;
   }
@@ -72,28 +125,74 @@ export function CommentsList({
 
   return (
     <div className="linear-list">
-      {comments.map((comment) => (
-        <button key={comment.key} className="linear-item" type="button" onClick={() => onOpen(comment.webUrl)}>
-          <div className="linear-item-head comment-row-head">
-            <div className="comment-head-main">
-              {showAvatars && (
-                comment.authorAvatarUrl ? (
-                  <img
-                    alt={comment.authorName}
-                    className="comment-avatar"
-                    src={comment.authorAvatarUrl}
-                  />
-                ) : (
-                  <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
-                )
-              )}
-              <span className="linear-item-title">MR !{comment.mrIid}</span>
-            </div>
-            <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
+      <div className="mr-comment-list">
+        <div className="mr-comment-toolbar">
+          <div className="mr-comment-toolbar-group">
+            <button
+              className="mr-inline-tool-btn"
+              type="button"
+              onClick={() =>
+                setSelectedCommentKeys(allSelected ? [] : comments.map((comment) => comment.key))
+              }
+            >
+              {allSelected ? "Désélectionner" : "Tout sélectionner"}
+            </button>
+            <button
+              className="mr-inline-tool-btn"
+              type="button"
+              onClick={() => setSelectedCommentKeys([])}
+            >
+              Effacer
+            </button>
           </div>
-          <p className="linear-item-body">{comment.body || "(sans contenu)"}</p>
-        </button>
-      ))}
+          <div className="mr-comment-toolbar-group">
+            <button
+              className="mr-inline-tool-btn"
+              disabled={selectedComments.length === 0}
+              type="button"
+              onClick={() => void copyPrompt("selection")}
+            >
+              Copier sélection
+            </button>
+            <button className="mr-inline-tool-btn" type="button" onClick={() => void copyPrompt("all")}>
+              Copier tout
+            </button>
+          </div>
+        </div>
+        {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
+        {comments.map((comment) => (
+          <div key={comment.key} className="mr-comment-item">
+            <div className="mr-comment-head comment-row-head">
+              <div className="comment-head-main">
+                <input
+                  checked={selectedCommentKeys.includes(comment.key)}
+                  className="mr-comment-check"
+                  type="checkbox"
+                  onChange={() => toggleSelection(comment.key)}
+                />
+                {showAvatars &&
+                  (comment.authorAvatarUrl ? (
+                    <img
+                      alt={comment.authorName}
+                      className="comment-avatar"
+                      src={comment.authorAvatarUrl}
+                    />
+                  ) : (
+                    <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
+                  ))}
+                <span className="linear-item-title">MR !{comment.mrIid}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
+                <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
+                  Open
+                </button>
+              </div>
+            </div>
+            <p className="comments-item-body">{comment.body || "(sans contenu)"}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import type {
+  CommentItem,
   MergeRequestDiscussionNote,
   MergeRequestDiscussionReference,
   MergeRequestItem,
@@ -69,5 +70,35 @@ export function buildMrCorrectionPrompt(
     "- Corriger le code en respectant l'intention de chaque commentaire.",
     "- Conserver le style et les conventions du projet.",
     "- Lister les fichiers modifiés et résumer brièvement les changements.",
+  ].join("\n");
+}
+
+export function buildCommentsCorrectionPrompt(comments: CommentItem[]): string {
+  const sortedComments = [...comments].sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+
+  const sections = sortedComments.map((comment, index) =>
+    [
+      `### Commentaire ${index + 1}`,
+      `- MR: !${comment.mrIid}`,
+      `- Auteur: ${comment.authorName}`,
+      `- Date: ${comment.createdAt}`,
+      `- URL: ${comment.webUrl}`,
+      "- Référence: non disponible dans la vue globale (ouvrir l'URL si besoin)",
+      "- Contenu:",
+      normalizeCommentBody(comment.body),
+    ].join("\n"),
+  );
+
+  return [
+    "Tu es un agent de correction de code.",
+    "Traite les commentaires ci-dessous et propose un plan de corrections puis un diff minimal.",
+    "",
+    "## Commentaires à traiter",
+    ...sections,
+    "",
+    "## Attendus",
+    "- Corriger chaque point remonté.",
+    "- Respecter les conventions du projet.",
+    "- Lister les fichiers impactés et les changements clés.",
   ].join("\n");
 }
