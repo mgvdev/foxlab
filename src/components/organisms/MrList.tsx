@@ -480,7 +480,8 @@ export function MrList({
   return (
     <div className="linear-list">
       <ScrollArea className="themed-scroll-area">
-        {orderedMrs.map((mr) => {
+        <div className="themed-scroll-content">
+          {orderedMrs.map((mr) => {
           const isMuted = mutedSet.has(mr.iid);
           const isExpanded = expandedIds.has(mr.id);
           const notes = commentCache[mr.id] ?? [];
@@ -497,7 +498,7 @@ export function MrList({
             displayedNotes.length > 0 && displayedNotes.every((note) => selectedIds.includes(note.id));
           const selectedDisplayedNotes = displayedNotes.filter((note) => selectedIds.includes(note.id));
           const copyFeedback = copyFeedbackByMr[mr.id];
-          return (
+            return (
             <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
               <div className="linear-item mr-item-trigger">
               {isApproved ? (
@@ -854,8 +855,9 @@ export function MrList({
                 </div>
               )}
             </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </ScrollArea>
     </div>
   );

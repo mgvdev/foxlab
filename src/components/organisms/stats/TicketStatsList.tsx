@@ -34,27 +34,29 @@ export function TicketStatsList({
   return (
     <section className="stats-ticket-list">
       <ScrollArea className="themed-scroll-area">
-        {tickets.map((ticket) => {
-          const key = ticketKey(ticket);
+        <div className="themed-scroll-content">
+          {tickets.map((ticket) => {
+            const key = ticketKey(ticket);
 
-          return (
-            <div
-              key={key}
-              ref={(node) => {
-                ticketRefs.current[key] = node;
-              }}
-            >
-              <StatsTicketRow
-                cycleConfigured={cycleConfigured}
-                cycleStats={cycleStatsByTicket[key]}
-                formatDuration={formatDuration}
-                isFocused={focusedTicketKey === key}
-                ticket={ticket}
-                onOpen={onOpen}
-              />
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={key}
+                ref={(node) => {
+                  ticketRefs.current[key] = node;
+                }}
+              >
+                <StatsTicketRow
+                  cycleConfigured={cycleConfigured}
+                  cycleStats={cycleStatsByTicket[key]}
+                  formatDuration={formatDuration}
+                  isFocused={focusedTicketKey === key}
+                  ticket={ticket}
+                  onOpen={onOpen}
+                />
+              </div>
+            );
+          })}
+        </div>
       </ScrollArea>
     </section>
   );

@@ -142,8 +142,9 @@ export function CommentsList({
   return (
     <div className="linear-list">
       <ScrollArea className="themed-scroll-area">
-        <div className="mr-comment-list">
-          <div className="mr-comment-toolbar">
+        <div className="themed-scroll-content">
+          <div className="mr-comment-list">
+            <div className="mr-comment-toolbar">
             <div className="mr-comment-toolbar-group">
               <button
                 className="mr-inline-tool-btn"
@@ -175,41 +176,42 @@ export function CommentsList({
                 Copier tout
               </button>
             </div>
-          </div>
-          {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
-          {comments.map((comment) => (
-            <div key={comment.key} className="mr-comment-item">
-              <div className="mr-comment-head comment-row-head">
-                <div className="comment-head-main">
-                  <input
-                    checked={selectedCommentKeys.includes(comment.key)}
-                    className="mr-comment-check"
-                    type="checkbox"
-                    onChange={() => toggleSelection(comment.key)}
-                  />
-                  {showAvatars &&
-                    (comment.authorAvatarUrl ? (
-                      <img
-                        alt={comment.authorName}
-                        className="comment-avatar"
-                        src={comment.authorAvatarUrl}
-                      />
-                    ) : (
-                      <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
-                    ))}
-                  <span className="linear-item-title">MR !{comment.mrIid}</span>
+            </div>
+            {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
+            {comments.map((comment) => (
+              <div key={comment.key} className="mr-comment-item">
+                <div className="mr-comment-head comment-row-head">
+                  <div className="comment-head-main">
+                    <input
+                      checked={selectedCommentKeys.includes(comment.key)}
+                      className="mr-comment-check"
+                      type="checkbox"
+                      onChange={() => toggleSelection(comment.key)}
+                    />
+                    {showAvatars &&
+                      (comment.authorAvatarUrl ? (
+                        <img
+                          alt={comment.authorName}
+                          className="comment-avatar"
+                          src={comment.authorAvatarUrl}
+                        />
+                      ) : (
+                        <span className="comment-avatar comment-avatar-fallback">{initials(comment.authorName)}</span>
+                      ))}
+                    <span className="linear-item-title">MR !{comment.mrIid}</span>
+                  </div>
+                  <div className="comment-row-meta">
+                    <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
+                    <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
+                      Open
+                    </button>
+                  </div>
                 </div>
-              <div className="comment-row-meta">
-                <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
-                <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
-                  Open
-                </button>
+                <p className="comments-item-body">{previewCommentBody(comment.body) || "(sans contenu)"}</p>
               </div>
-              </div>
-            <p className="comments-item-body">{previewCommentBody(comment.body) || "(sans contenu)"}</p>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
       </ScrollArea>
     </div>
   );

@@ -349,11 +349,15 @@ body {
   height: 100%;
 }
 
-.themed-scroll-area [data-radix-scroll-area-viewport] > div {
-  min-width: 100%;
+.themed-scroll-area [data-radix-scroll-area-viewport] {
+  overflow-x: hidden;
+}
+
+.themed-scroll-content {
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   padding-right: 14px;
-  overflow-x: hidden;
 }
 
 .linear-item {
@@ -890,6 +894,8 @@ body {
   padding: 4px 4px 6px 10px;
   border-left: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
   overflow-x: hidden;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .mr-comment-list {
@@ -897,12 +903,16 @@ body {
   flex-direction: column;
   gap: 4px;
   padding: 2px 0 0;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .mr-thread {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .mr-thread-replies {
@@ -912,6 +922,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .mr-comment-toolbar {
@@ -1167,6 +1179,8 @@ body {
 
 .mr-comment-item {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   border: 0;
   border-radius: 6px;
   padding: 6px 7px;
@@ -1197,6 +1211,7 @@ body {
   gap: 6px;
   min-width: 0;
   flex-direction: column;
+  max-width: 100%;
 }
 
 .mr-comment-meta {
@@ -1208,6 +1223,7 @@ body {
   max-width: 100%;
   flex-wrap: wrap;
   justify-content: flex-start;
+  min-width: 0;
 }
 
 .mr-comment-check {

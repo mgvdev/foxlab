@@ -208,7 +208,8 @@ export function TicketList({
   return (
     <div className="linear-list">
       <ScrollArea className="themed-scroll-area">
-        {tickets.map((ticket) => {
+        <div className="themed-scroll-content">
+          {tickets.map((ticket) => {
           const hasEstimate = ticket.timeEstimateSeconds > 0;
           const estimateLabel = hasEstimate ? ticket.humanTimeEstimate : "No estimate";
           const rawRatio = hasEstimate ? ticket.totalTimeSpentSeconds / ticket.timeEstimateSeconds : 0;
@@ -221,7 +222,7 @@ export function TicketList({
           const timeError = timeErrorByTicket[ticket.id];
           const fillColor = progressColor(rawRatio, isOverrun, hasEstimate);
 
-          return (
+            return (
             <div key={ticket.id} className="linear-item ticket-item-row">
             <div
               className="ticket-toggle-btn"
@@ -370,8 +371,9 @@ export function TicketList({
               </div>
             )}
             </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </ScrollArea>
     </div>
   );
