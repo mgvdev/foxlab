@@ -55,7 +55,6 @@ export function buildMrCorrectionPrompt(
   });
 
   return [
-    "Tu es un agent de correction de code.",
     "Applique les corrections demandées par les commentaires ci-dessous, puis propose un diff propre et minimal.",
     "",
     "## Contexte MR",
@@ -70,6 +69,8 @@ export function buildMrCorrectionPrompt(
     "- Corriger le code en respectant l'intention de chaque commentaire.",
     "- Conserver le style et les conventions du projet.",
     "- Lister les fichiers modifiés et résumer brièvement les changements.",
+    "- Modifier et lancer les tests si nécessaire.",
+    "- Lancer le linter et corriger les erreurs si configuré.",
   ].join("\n");
 }
 
