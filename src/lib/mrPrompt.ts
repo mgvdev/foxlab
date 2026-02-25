@@ -68,7 +68,7 @@ export function buildMrCorrectionPrompt(
     "## Attendus",
     "- Corriger le code en respectant l'intention de chaque commentaire.",
     "- Conserver le style et les conventions du projet.",
-    "- Lister les fichiers modifiés et résumer brièvement les changements.",
+    "- Lister les fichiers modifiés et résumer brièvement les changements",
     "- Modifier et lancer les tests si nécessaire.",
     "- Lancer le linter et corriger les erreurs si configuré.",
   ].join("\n");
