@@ -5,6 +5,8 @@
   "windows": ["main", "settings", "stats"],
   "permissions": [
     "core:default",
+    "core:window:allow-create",
+    "core:webview:allow-create-webview-window",
     "opener:default",
     "store:default",
     "notification:default"
