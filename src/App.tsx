@@ -1,7 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { SettingsModal } from "./components/SettingsModal";
+import { SettingsWindow } from "./components/SettingsWindow";
+import { StatsWindow } from "./components/StatsWindow";
 import { TrayPopover, type ActiveTab } from "./components/TrayPopover";
+import {
+  addTicketSpentTime,
+  fetchMergeRequestCiStatus,
+  fetchMergeRequestDiscussionNotes,
+  fetchTicketTimeStats,
+  playCiJob,
+  setTicketTimeEstimate,
+} from "./lib/gitlab";
 import { createGitLabPoller, type PollerResult } from "./lib/poller";
 import {
   loadLastNotifiedCommentAt,
@@ -11,15 +21,7 @@ import {
   saveLastSeenCommentAt,
   saveSettings,
 } from "./lib/store";
-import { testGitLabConnection } from "./lib/gitlab";
-import {
-  addTicketSpentTime,
-  fetchMergeRequestCiStatus,
-  fetchMergeRequestDiscussionNotes,
-  fetchTicketTimeStats,
-  playCiJob,
-  setTicketTimeEstimate,
-} from "./lib/gitlab";
+import { openSettingsWindow, openStatsWindow } from "./lib/windows";
 import {
   DEFAULT_SETTINGS,
   type AppSnapshot,
@@ -44,17 +46,12 @@ function hasValidSettings(settings: Settings): boolean {
   );
 }
 
-function App() {
+function MainWindowApp() {
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
-  const [settingsDraft, setSettingsDraft] = useState<Settings>(DEFAULT_SETTINGS);
   const [snapshot, setSnapshot] = useState<AppSnapshot>(EMPTY_SNAPSHOT);
   const [activeTab, setActiveTab] = useState<ActiveTab>("comments");
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [isTestingConnection, setIsTestingConnection] = useState(false);
-  const [testConnectionResult, setTestConnectionResult] = useState<string | null>(null);
   const [lastSeenCommentAt, setLastSeenCommentAt] = useState<string | null>(null);
   const [lastNotifiedCommentAt, setLastNotifiedCommentAt] = useState<string | null>(null);
 
@@ -87,7 +84,6 @@ function App() {
         ]);
 
         setSettings(storedSettings);
-        setSettingsDraft(storedSettings);
         setLastSeenCommentAt(seenAt);
         setLastNotifiedCommentAt(notifiedAt);
       } catch (error) {
@@ -101,6 +97,32 @@ function App() {
     };
 
     void bootstrap();
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    void getCurrentWebviewWindow()
+      .listen("settings:updated", async () => {
+        try {
+          const storedSettings = await loadSettings();
+          setSettings(storedSettings);
+        } catch (error) {
+          setSnapshot((current) => ({
+            ...current,
+            error: error instanceof Error ? error.message : "Impossible de recharger les réglages",
+          }));
+        }
+      })
+      .then((dispose) => {
+        unlisten = dispose;
+      });
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
   }, []);
 
   const handlePollerResult = useCallback(async (result: PollerResult) => {
@@ -159,37 +181,6 @@ function App() {
     pollerRef.current.refresh();
   }, []);
 
-  const handleSaveSettings = useCallback(async () => {
-    setIsSavingSettings(true);
-    setTestConnectionResult(null);
-
-    try {
-      await saveSettings(settingsDraft);
-      setSettings(settingsDraft);
-      setIsSettingsOpen(false);
-    } catch (error) {
-      setTestConnectionResult(error instanceof Error ? error.message : "Impossible d'enregistrer");
-    } finally {
-      setIsSavingSettings(false);
-    }
-  }, [settingsDraft]);
-
-  const handleTestConnection = useCallback(async () => {
-    setIsTestingConnection(true);
-    setTestConnectionResult(null);
-
-    try {
-      const user = await testGitLabConnection(settingsDraft);
-      setTestConnectionResult(`Connexion OK: ${user.name} (@${user.username})`);
-    } catch (error) {
-      setTestConnectionResult(
-        error instanceof Error ? error.message : "Échec du test de connexion",
-      );
-    } finally {
-      setIsTestingConnection(false);
-    }
-  }, [settingsDraft]);
-
   const openItem = useCallback(async (url: string) => {
     try {
       await openUrl(url);
@@ -213,6 +204,7 @@ function App() {
     (projectId: number, jobId: number) => playCiJob(settings, projectId, jobId),
     [settings],
   );
+
   const handleAddTicketSpentTime = useCallback(
     async (ticket: TicketItem, duration: string) => {
       try {
@@ -240,6 +232,7 @@ function App() {
     },
     [settings],
   );
+
   const handleSetTicketEstimate = useCallback(
     async (ticket: TicketItem, duration: string) => {
       try {
@@ -267,6 +260,7 @@ function App() {
     },
     [settings],
   );
+
   const handleToggleMuteMrIid = useCallback((iid: number) => {
     setSettings((current) => {
       const muted = current.mutedMrIids.includes(iid);
@@ -277,7 +271,6 @@ function App() {
           : [...current.mutedMrIids, iid],
       };
 
-      setSettingsDraft(next);
       void saveSettings(next).catch((error) => {
         setSnapshot((snapshotState) => ({
           ...snapshotState,
@@ -286,6 +279,37 @@ function App() {
       });
 
       return next;
+    });
+  }, []);
+
+  const handleOpenSettingsWindow = useCallback(() => {
+    void openSettingsWindow().catch((error) => {
+      setSnapshot((current) => ({
+        ...current,
+        error: error instanceof Error ? error.message : "Impossible d'ouvrir la fenêtre settings",
+      }));
+    });
+  }, []);
+
+  const handleOpenStatsWindow = useCallback(() => {
+    void openStatsWindow().catch((error) => {
+      setSnapshot((current) => ({
+        ...current,
+        error: error instanceof Error ? error.message : "Impossible d'ouvrir la fenêtre stats",
+      }));
+    });
+  }, []);
+
+  const handleOpenTicketStats = useCallback((ticket: TicketItem) => {
+    void openStatsWindow({
+      ticketId: ticket.id,
+      ticketIid: ticket.iid,
+      projectId: ticket.projectId,
+    }).catch((error) => {
+      setSnapshot((current) => ({
+        ...current,
+        error: error instanceof Error ? error.message : "Impossible d'ouvrir les stats ticket",
+      }));
     });
   }, []);
 
@@ -302,6 +326,7 @@ function App() {
         onOpenComment={openItem}
         onOpenMr={openItem}
         onOpenTicket={openItem}
+        onOpenTicketStats={handleOpenTicketStats}
         onLoadMrComments={handleLoadMrComments}
         onLoadMrCi={handleLoadMrCi}
         onPlayCiJob={handlePlayCiJob}
@@ -310,21 +335,10 @@ function App() {
         mutedMrIids={settings.mutedMrIids}
         onToggleMuteMrIid={handleToggleMuteMrIid}
         showCommentAvatars={settings.showCommentAvatars}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={handleOpenSettingsWindow}
+        onOpenStatsWindow={handleOpenStatsWindow}
         onRetry={handleManualRefresh}
         onTabChange={setActiveTab}
-      />
-
-      <SettingsModal
-        draft={settingsDraft}
-        isOpen={isSettingsOpen}
-        isSaving={isSavingSettings}
-        isTestingConnection={isTestingConnection}
-        testConnectionResult={testConnectionResult}
-        onChange={setSettingsDraft}
-        onOpenChange={setIsSettingsOpen}
-        onSave={handleSaveSettings}
-        onTestConnection={handleTestConnection}
       />
 
       {!canRefresh && (
@@ -334,6 +348,28 @@ function App() {
       )}
     </>
   );
+}
+
+function resolveWindowLabel(): string {
+  try {
+    return getCurrentWebviewWindow().label;
+  } catch {
+    return "main";
+  }
+}
+
+function App() {
+  const windowLabel = useMemo(() => resolveWindowLabel(), []);
+
+  if (windowLabel === "settings") {
+    return <SettingsWindow />;
+  }
+
+  if (windowLabel === "stats") {
+    return <StatsWindow />;
+  }
+
+  return <MainWindowApp />;
 }
 
 export default App;

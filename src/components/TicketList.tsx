@@ -7,6 +7,7 @@ interface TicketListProps {
   loading: boolean;
   error: string | null;
   onOpen: (url: string) => void;
+  onOpenStats: (ticket: TicketItem) => void;
   onRetry: () => void;
   onAddSpentTime: (ticket: TicketItem, duration: string) => Promise<void>;
   onSetEstimate: (ticket: TicketItem, duration: string) => Promise<void>;
@@ -80,6 +81,7 @@ export function TicketList({
   loading,
   error,
   onOpen,
+  onOpenStats,
   onRetry,
   onAddSpentTime,
   onSetEstimate,
@@ -278,6 +280,9 @@ export function TicketList({
                 <div className="ticket-actions">
                   <button className="mr-open-btn" type="button" onClick={() => onOpen(ticket.webUrl)}>
                     Open
+                  </button>
+                  <button className="mr-open-btn" type="button" onClick={() => onOpenStats(ticket)}>
+                    Stats
                   </button>
                   <Popover>
                     <Popover.Trigger aria-label={`Ajouter du temps sur ticket #${ticket.iid}`}>

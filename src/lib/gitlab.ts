@@ -66,6 +66,14 @@ interface RawIssue {
   author?: { name?: string };
 }
 
+interface RawIssueLabelEvent {
+  action?: string;
+  created_at: string;
+  label?: {
+    name?: string;
+  };
+}
+
 interface RawDiscussionNote {
   id: number;
   body: string;
@@ -112,6 +120,12 @@ interface RawPipelineJob {
   stage: string;
   status: string;
   web_url: string;
+}
+
+export interface TicketLabelEvent {
+  action: string;
+  label: string;
+  createdAt: string;
 }
 
 function normalizeBaseUrl(baseUrl: string): string {
@@ -502,6 +516,29 @@ export async function setTicketTimeEstimate(
   }
 
   throw buildGitLabError(response, `Estimate ticket #${ticket.iid}`);
+}
+
+export async function fetchTicketLabelEvents(
+  settings: Settings,
+  ticket: TicketItem,
+): Promise<TicketLabelEvent[]> {
+  const baseUrl = normalizeBaseUrl(settings.gitlabBaseUrl);
+  const token = settings.personalAccessToken.trim();
+  const search = new URLSearchParams({
+    per_page: "100",
+    page: "1",
+  });
+  const url = `${baseUrl}/api/v4/projects/${ticket.projectId}/issues/${ticket.iid}/resource_label_events?${search.toString()}`;
+  const events = await fetchJson<RawIssueLabelEvent[]>(url, token, `Label events ticket #${ticket.iid}`);
+
+  return events
+    .filter((event) => typeof event.created_at === "string" && event.label?.name?.trim())
+    .map((event) => ({
+      action: event.action?.trim() || "unknown",
+      label: event.label!.name!.trim(),
+      createdAt: event.created_at,
+    }))
+    .sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
 }
 
 function parseDiscussionReference(position: RawDiscussionPosition | null | undefined): MergeRequestDiscussionReference | null {

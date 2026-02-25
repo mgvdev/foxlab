@@ -19,11 +19,13 @@ interface TrayPopoverProps {
   isRefreshing: boolean;
   onTabChange: (tab: ActiveTab) => void;
   onOpenSettings: () => void;
+  onOpenStatsWindow: () => void;
   onManualRefresh: () => void;
   onRetry: () => void;
   onOpenComment: (url: string) => void;
   onOpenMr: (url: string) => void;
   onOpenTicket: (url: string) => void;
+  onOpenTicketStats: (ticket: TicketItem) => void;
   onLoadMrComments: (mr: MergeRequestItem) => Promise<MergeRequestDiscussionNote[]>;
   onLoadMrCi: (mr: MergeRequestItem) => Promise<MergeRequestCiStatus>;
   onPlayCiJob: (projectId: number, jobId: number) => Promise<void>;
@@ -69,11 +71,13 @@ export function TrayPopover({
   isRefreshing,
   onTabChange,
   onOpenSettings,
+  onOpenStatsWindow,
   onManualRefresh,
   onRetry,
   onOpenComment,
   onOpenMr,
   onOpenTicket,
+  onOpenTicketStats,
   onLoadMrComments,
   onLoadMrCi,
   onPlayCiJob,
@@ -97,6 +101,9 @@ export function TrayPopover({
         <div className="flex items-center gap-1.5">
           <Button size="sm" variant="secondary" onPress={onManualRefresh}>
             {isRefreshing ? "..." : "↻"}
+          </Button>
+          <Button size="sm" variant="secondary" onPress={onOpenStatsWindow}>
+            📊
           </Button>
           <Button size="sm" variant="secondary" onPress={onOpenSettings}>
             ⚙
@@ -173,6 +180,7 @@ export function TrayPopover({
             loading={loading}
             tickets={snapshot.tickets}
             onOpen={onOpenTicket}
+            onOpenStats={onOpenTicketStats}
             onRetry={onRetry}
             onAddSpentTime={onAddTicketSpentTime}
             onSetEstimate={onSetTicketEstimate}

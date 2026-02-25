@@ -8,6 +8,8 @@ export interface Settings {
   theme: ThemeMode;
   mutedMrIids: number[];
   showCommentAvatars: boolean;
+  cycleStartLabel: string;
+  cycleEndLabel: string;
 }
 
 export interface MergeRequestItem {
@@ -135,6 +137,8 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: "light",
   mutedMrIids: [],
   showCommentAvatars: true,
+  cycleStartLabel: "",
+  cycleEndLabel: "",
 };
 
 export const MR_LIMIT = 20;

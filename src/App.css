@@ -1348,3 +1348,243 @@ body {
   color: #dce9ee;
   background: rgba(58, 82, 96, 0.36);
 }
+
+.window-shell {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  padding: 14px;
+  background: #f3f6fa;
+}
+
+:root[data-theme="dark"] .window-shell {
+  background: #010204;
+}
+
+.window-card {
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(27, 44, 66, 0.12);
+  background: rgba(255, 255, 255, 0.86);
+  color: inherit;
+  padding: 12px;
+}
+
+:root[data-theme="dark"] .window-card {
+  border-color: #1a2029;
+  background: #090d13;
+}
+
+.window-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.window-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.window-subtitle {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #5d728a;
+}
+
+:root[data-theme="dark"] .window-subtitle {
+  color: #8ea3bd;
+}
+
+.window-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.window-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.window-actions-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.window-status {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #56708e;
+}
+
+:root[data-theme="dark"] .window-status {
+  color: #9bb2cc;
+}
+
+.window-status-error {
+  color: #ce4353;
+}
+
+.window-empty {
+  margin-top: 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(27, 44, 66, 0.12);
+  padding: 12px;
+  font-size: 12px;
+  color: #5b6d82;
+  background: rgba(245, 249, 252, 0.7);
+}
+
+:root[data-theme="dark"] .window-empty {
+  border-color: #1f2937;
+  color: #95abc5;
+  background: #0d141f;
+}
+
+.stats-window {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: calc(100vh - 28px);
+}
+
+.stats-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.stats-metric-card {
+  border-radius: 9px;
+  border: 1px solid rgba(27, 44, 66, 0.11);
+  background: rgba(243, 248, 253, 0.78);
+  padding: 8px 9px;
+}
+
+:root[data-theme="dark"] .stats-metric-card {
+  border-color: #1f2833;
+  background: #0d141f;
+}
+
+.stats-metric-label {
+  margin: 0;
+  font-size: 10px;
+  color: #68809d;
+}
+
+:root[data-theme="dark"] .stats-metric-label {
+  color: #93abca;
+}
+
+.stats-metric-value {
+  margin: 3px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.stats-ticket-list {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(27, 44, 66, 0.12);
+  background: rgba(248, 252, 255, 0.74);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+:root[data-theme="dark"] .stats-ticket-list {
+  border-color: #202937;
+  background: #060a10;
+}
+
+.stats-ticket-row {
+  border-radius: 8px;
+  border: 1px solid rgba(27, 44, 66, 0.1);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 8px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+:root[data-theme="dark"] .stats-ticket-row {
+  border-color: #1f2a39;
+  background: #0a111a;
+}
+
+.stats-ticket-row.is-focused {
+  border-color: #4a78a8;
+  box-shadow: 0 0 0 1px rgba(74, 120, 168, 0.32);
+}
+
+:root[data-theme="dark"] .stats-ticket-row.is-focused {
+  border-color: #6ea2d7;
+  box-shadow: 0 0 0 1px rgba(110, 162, 215, 0.42);
+}
+
+.stats-ticket-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stats-ticket-title {
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.stats-ticket-title:hover {
+  text-decoration: underline;
+}
+
+.stats-ticket-meta {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #6d839f;
+}
+
+:root[data-theme="dark"] .stats-ticket-meta {
+  color: #8fa6c2;
+}
+
+.stats-ticket-values {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: #56708d;
+  flex-wrap: wrap;
+}
+
+:root[data-theme="dark"] .stats-ticket-values {
+  color: #9fb7d3;
+}
+
+.stats-ticket-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+}
