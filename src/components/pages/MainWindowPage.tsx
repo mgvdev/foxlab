@@ -1,4 +1,8 @@
-import { TrayPopover, type ActiveTab } from "@/components/organisms/TrayPopover";
+import {
+  TrayPopover,
+  type ActiveTab,
+  type MainWindowPresenceState,
+} from "@/components/organisms/TrayPopover";
 import type {
   AppSnapshot,
   MergeRequestCiStatus,
@@ -14,6 +18,7 @@ interface MainWindowPageProps {
   snapshot: AppSnapshot;
   mutedMrIids: number[];
   showCommentAvatars: boolean;
+  windowPresenceState: MainWindowPresenceState;
   onManualRefresh: () => void;
   onOpenComment: (url: string) => void;
   onOpenMr: (url: string) => void;
@@ -32,5 +37,6 @@ interface MainWindowPageProps {
 }
 
 export function MainWindowPage(props: MainWindowPageProps) {
-  return <TrayPopover {...props} />;
+  const { windowPresenceState, ...rest } = props;
+  return <TrayPopover {...rest} presenceState={windowPresenceState} />;
 }

@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { type ActiveTab } from "@/components/organisms/TrayPopover";
+import {
+  type ActiveTab,
+  type MainWindowPresenceState,
+} from "@/components/organisms/TrayPopover";
 import { MainWindowPage } from "@/components/pages/MainWindowPage";
 import { SettingsPage } from "@/components/pages/SettingsPage";
 import { StatsPage } from "@/components/pages/StatsPage";
@@ -56,13 +60,37 @@ function MainWindowApp() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastSeenCommentAt, setLastSeenCommentAt] = useState<string | null>(null);
   const [lastNotifiedCommentAt, setLastNotifiedCommentAt] = useState<string | null>(null);
+  const [windowPresenceState, setWindowPresenceState] =
+    useState<MainWindowPresenceState>("idle");
 
   const pollerRef = useRef<ReturnType<typeof createGitLabPoller> | null>(null);
+  const windowPresenceStateRef = useRef<MainWindowPresenceState>("idle");
+  const enterPresenceTimeoutRef = useRef<number | null>(null);
+  const exitPresenceTimeoutRef = useRef<number | null>(null);
   const latestContextRef = useRef({
     settings,
     lastSeenCommentAt,
     lastNotifiedCommentAt,
   });
+
+  const clearWindowPresenceTimers = useCallback(() => {
+    if (enterPresenceTimeoutRef.current !== null) {
+      window.clearTimeout(enterPresenceTimeoutRef.current);
+      enterPresenceTimeoutRef.current = null;
+    }
+
+    if (exitPresenceTimeoutRef.current !== null) {
+      window.clearTimeout(exitPresenceTimeoutRef.current);
+      exitPresenceTimeoutRef.current = null;
+    }
+  }, []);
+
+  const shouldReduceMotion = useCallback(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return false;
+    }
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
 
   useEffect(() => {
     latestContextRef.current = {
@@ -71,6 +99,10 @@ function MainWindowApp() {
       lastNotifiedCommentAt,
     };
   }, [settings, lastSeenCommentAt, lastNotifiedCommentAt]);
+
+  useEffect(() => {
+    windowPresenceStateRef.current = windowPresenceState;
+  }, [windowPresenceState]);
 
   useEffect(() => {
     applyThemeMode(settings.theme);
@@ -126,6 +158,79 @@ function MainWindowApp() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    let disposeEnter: (() => void) | undefined;
+    let disposeRequestExit: (() => void) | undefined;
+
+    void getCurrentWebviewWindow()
+      .listen("main-window:enter", () => {
+        if (exitPresenceTimeoutRef.current !== null) {
+          window.clearTimeout(exitPresenceTimeoutRef.current);
+          exitPresenceTimeoutRef.current = null;
+        }
+        if (enterPresenceTimeoutRef.current !== null) {
+          window.clearTimeout(enterPresenceTimeoutRef.current);
+          enterPresenceTimeoutRef.current = null;
+        }
+
+        setWindowPresenceState("entering");
+
+        const enterDuration = shouldReduceMotion() ? 0 : 140;
+        enterPresenceTimeoutRef.current = window.setTimeout(() => {
+          setWindowPresenceState("idle");
+          enterPresenceTimeoutRef.current = null;
+        }, enterDuration);
+      })
+      .then((dispose) => {
+        disposeEnter = dispose;
+      });
+
+    void getCurrentWebviewWindow()
+      .listen("main-window:request-exit", () => {
+        if (windowPresenceStateRef.current === "exiting") {
+          return;
+        }
+        if (enterPresenceTimeoutRef.current !== null) {
+          window.clearTimeout(enterPresenceTimeoutRef.current);
+          enterPresenceTimeoutRef.current = null;
+        }
+
+        setWindowPresenceState("exiting");
+
+        const exitDuration = shouldReduceMotion() ? 0 : 120;
+        if (exitPresenceTimeoutRef.current !== null) {
+          window.clearTimeout(exitPresenceTimeoutRef.current);
+        }
+
+        exitPresenceTimeoutRef.current = window.setTimeout(() => {
+          void invoke("hide_main_window")
+            .catch((error) => {
+              setSnapshot((current) => ({
+                ...current,
+                error: error instanceof Error ? error.message : "Impossible de masquer la fenêtre principale",
+              }));
+              setWindowPresenceState("idle");
+            })
+            .finally(() => {
+              exitPresenceTimeoutRef.current = null;
+            });
+        }, exitDuration);
+      })
+      .then((dispose) => {
+        disposeRequestExit = dispose;
+      });
+
+    return () => {
+      if (disposeEnter) {
+        disposeEnter();
+      }
+      if (disposeRequestExit) {
+        disposeRequestExit();
+      }
+      clearWindowPresenceTimers();
+    };
+  }, [clearWindowPresenceTimers, shouldReduceMotion]);
 
   const handlePollerResult = useCallback(async (result: PollerResult) => {
     setSnapshot(result.snapshot);
@@ -324,6 +429,7 @@ function MainWindowApp() {
         isRefreshing={isRefreshing}
         loading={isLoading}
         snapshot={snapshot}
+        windowPresenceState={windowPresenceState}
         onManualRefresh={handleManualRefresh}
         onOpenComment={openItem}
         onOpenMr={openItem}

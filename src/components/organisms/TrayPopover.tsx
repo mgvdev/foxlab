@@ -11,6 +11,7 @@ import type {
 } from "@/lib/types";
 
 export type ActiveTab = "comments" | "mrs" | "tickets";
+export type MainWindowPresenceState = "idle" | "entering" | "exiting";
 
 interface TrayPopoverProps {
   snapshot: AppSnapshot;
@@ -34,6 +35,7 @@ interface TrayPopoverProps {
   mutedMrIids: number[];
   onToggleMuteMrIid: (iid: number) => void;
   showCommentAvatars: boolean;
+  presenceState: MainWindowPresenceState;
 }
 
 function CommentIcon() {
@@ -126,9 +128,17 @@ export function TrayPopover({
   mutedMrIids,
   onToggleMuteMrIid,
   showCommentAvatars,
+  presenceState,
 }: TrayPopoverProps) {
+  const presenceClass =
+    presenceState === "idle"
+      ? ""
+      : presenceState === "entering"
+        ? " is-entering"
+        : " is-exiting";
+
   return (
-    <main className="menubar-root">
+    <main className={`menubar-root${presenceClass}`}>
       <header className="menubar-header">
         <div className="menubar-title">
           <p className="menubar-title-main">Foxlab</p>
