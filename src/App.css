@@ -1152,6 +1152,7 @@ body {
   background: color-mix(in oklab, var(--ui-card-bg) 88%, var(--ui-surface) 12%);
   color: inherit;
   cursor: default;
+  overflow: hidden;
 }
 
 .mr-comment-item:hover {
@@ -1168,17 +1169,22 @@ body {
 
 .mr-comment-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 6px;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .mr-comment-meta {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  margin-left: auto;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .mr-comment-check {
@@ -1202,7 +1208,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  flex: 1;
+  flex: 1 1 240px;
 }
 
 .mr-comment-body {
@@ -1211,6 +1217,7 @@ body {
   color: var(--ui-muted-fg);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  word-break: break-word;
   max-width: 100%;
 }
 
@@ -1218,6 +1225,10 @@ body {
   margin: 3px 0 0;
   font-size: 10px;
   color: var(--ui-muted-fg);
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .mr-thread-toggle-row {
@@ -1259,6 +1270,7 @@ body {
   color: var(--ui-muted-fg);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+  word-break: break-word;
   max-width: 100%;
 }
 
