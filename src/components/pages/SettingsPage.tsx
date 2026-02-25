@@ -20,6 +20,13 @@ export function SettingsPage() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (!draft) {
+      return;
+    }
+    document.documentElement.setAttribute("data-theme", draft.theme);
+  }, [draft]);
+
   const handleSave = async () => {
     if (!draft || isSaving || isTestingConnection) {
       return;
@@ -60,7 +67,7 @@ export function SettingsPage() {
   if (!draft) {
     return (
       <SecondaryWindowTemplate>
-        <div className="p-2 text-sm text-zinc-400">Chargement des réglages...</div>
+        <div className="p-2 text-sm [color:var(--ui-muted-fg)]">Chargement des réglages...</div>
       </SecondaryWindowTemplate>
     );
   }

@@ -38,15 +38,15 @@ function OptionSegment<T extends string | number | boolean>({
   onSelect: (value: T) => void;
 }) {
   return (
-    <div className="grid grid-cols-4 gap-1 rounded-lg border border-zinc-800 bg-zinc-950/70 p-1">
+    <div className="grid grid-cols-4 gap-1 rounded-lg border p-1 [border-color:var(--ui-input-border)] [background:var(--ui-surface)]">
       {options.map((option) => (
         <button
           key={String(option)}
           className={cn(
             "h-8 rounded-md border text-xs font-semibold transition",
             selected === option
-              ? "border-zinc-600 bg-zinc-800 text-zinc-50"
-              : "border-transparent bg-transparent text-zinc-400 hover:bg-zinc-900",
+              ? "[border-color:var(--ui-ring)] [background:var(--ui-card-bg)] [color:var(--ui-fg)]"
+              : "border-transparent bg-transparent [color:var(--ui-muted-fg)] hover:[background:var(--ui-surface-hover)]",
           )}
           type="button"
           onClick={() => onSelect(option)}
@@ -105,7 +105,7 @@ export function SettingsForm({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Intervalle de synchro (min)</p>
+          <p className="text-xs font-semibold uppercase tracking-wide [color:var(--ui-muted-fg)]">Intervalle de synchro (min)</p>
           <OptionSegment
             getLabel={(value) => String(value)}
             options={INTERVAL_OPTIONS}
@@ -115,7 +115,7 @@ export function SettingsForm({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Thème</p>
+          <p className="text-xs font-semibold uppercase tracking-wide [color:var(--ui-muted-fg)]">Thème</p>
           <OptionSegment
             getLabel={(value) => (value === "light" ? "Light" : "Dark")}
             options={THEME_OPTIONS}
@@ -140,7 +140,7 @@ export function SettingsForm({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Afficher les avatars commentaires</p>
+          <p className="text-xs font-semibold uppercase tracking-wide [color:var(--ui-muted-fg)]">Afficher les avatars commentaires</p>
           <OptionSegment
             getLabel={(value) => (value ? "Oui" : "Non")}
             options={AVATAR_OPTIONS}

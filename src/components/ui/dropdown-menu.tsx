@@ -16,7 +16,7 @@ function DropdownMenuContent({
       <DropdownMenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-50 min-w-[8rem] overflow-hidden rounded-md border border-zinc-800 bg-zinc-950 p-1 text-zinc-100 shadow-md",
+          "z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-md [border-color:var(--ui-popover-border)] [background:var(--ui-popover-bg)] [color:var(--ui-fg)]",
           className,
         )}
         {...props}
@@ -29,7 +29,7 @@ function DropdownMenuItem({ className, ...props }: React.ComponentProps<typeof D
   return (
     <DropdownMenuPrimitive.Item
       className={cn(
-        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors focus:bg-zinc-900",
+        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none transition-colors focus:[background:var(--ui-surface-hover)]",
         className,
       )}
       {...props}

@@ -5,16 +5,21 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-400 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--ui-ring)] disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-zinc-900 text-zinc-50 shadow hover:bg-zinc-800",
+        default:
+          "bg-[var(--ui-accent)] text-[var(--ui-accent-fg)] shadow-sm hover:bg-[var(--ui-accent-hover)]",
         destructive: "bg-red-600 text-white shadow-sm hover:bg-red-500",
-        outline: "border border-zinc-700 bg-zinc-950/40 shadow-sm hover:bg-zinc-900/70",
-        secondary: "bg-zinc-900/70 text-zinc-100 hover:bg-zinc-800",
-        ghost: "hover:bg-zinc-900/70",
-        link: "text-zinc-300 underline-offset-4 hover:underline",
+        outline:
+          "border [border-color:var(--ui-card-border)] [background:var(--ui-card-bg)] [color:var(--ui-fg)] shadow-sm hover:[background:var(--ui-surface)]",
+        secondary:
+          "[background:var(--ui-surface)] [color:var(--ui-fg)] hover:[background:var(--ui-surface-hover)]",
+        ghost:
+          "[color:var(--ui-fg)] hover:[background:var(--ui-surface-hover)]",
+        link:
+          "[color:var(--ui-muted-fg)] underline-offset-4 hover:underline",
       },
       size: {
         default: "h-9 px-4 py-2",

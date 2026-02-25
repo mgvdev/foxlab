@@ -2,7 +2,26 @@
 @import "tw-animate-css";
 
 :root {
-  color: #102027;
+  --ui-fg: #111827;
+  --ui-muted-fg: #5f6b7a;
+  --ui-card-bg: #ffffff;
+  --ui-card-border: #cdd6e2;
+  --ui-surface: #eef2f7;
+  --ui-surface-hover: #e4ebf3;
+  --ui-input-bg: #ffffff;
+  --ui-input-border: #c4d0de;
+  --ui-input-fg: #111827;
+  --ui-input-placeholder: #8a97a8;
+  --ui-ring: #4c89cf;
+  --ui-accent: #1f2937;
+  --ui-accent-hover: #111827;
+  --ui-accent-fg: #f8fafc;
+  --ui-popover-bg: #fdfefe;
+  --ui-popover-border: #ced7e3;
+  --ui-tooltip-bg: #111827;
+  --ui-tooltip-fg: #f8fafc;
+  --ui-skeleton: #d7dee9;
+  color: var(--ui-fg);
   background: #f2f5f8;
   font-family: "Avenir Next", "SF Pro Text", "Helvetica Neue", sans-serif;
   line-height: 1.35;
@@ -12,6 +31,25 @@
 }
 
 :root[data-theme="dark"] {
+  --ui-fg: #e8edf4;
+  --ui-muted-fg: #94a2b5;
+  --ui-card-bg: #0b0f14;
+  --ui-card-border: #252c37;
+  --ui-surface: #131923;
+  --ui-surface-hover: #1c2532;
+  --ui-input-bg: #070b11;
+  --ui-input-border: #2a3340;
+  --ui-input-fg: #e8edf4;
+  --ui-input-placeholder: #6e7d91;
+  --ui-ring: #6fa2d8;
+  --ui-accent: #e8edf4;
+  --ui-accent-hover: #d9e2ee;
+  --ui-accent-fg: #0b0f14;
+  --ui-popover-bg: #0b0f14;
+  --ui-popover-border: #2a3340;
+  --ui-tooltip-bg: #0f141c;
+  --ui-tooltip-fg: #e8edf4;
+  --ui-skeleton: #1a222f;
   color: #e6edf3;
   background: #020304;
 }

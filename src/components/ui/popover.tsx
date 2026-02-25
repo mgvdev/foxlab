@@ -23,7 +23,7 @@ function PopoverContent({
         align={align}
         sideOffset={sideOffset}
         className={cn(
-          "z-50 w-72 rounded-md border border-zinc-800 bg-zinc-950 p-3 text-zinc-100 shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out",
+          "z-50 w-72 rounded-md border p-3 shadow-md outline-none [border-color:var(--ui-popover-border)] [background:var(--ui-popover-bg)] [color:var(--ui-fg)] data-[state=open]:animate-in data-[state=closed]:animate-out",
           className,
         )}
         {...props}

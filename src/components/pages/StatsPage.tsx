@@ -210,6 +210,13 @@ export function StatsPage() {
   }, [settings, loadStats]);
 
   useEffect(() => {
+    if (!settings) {
+      return;
+    }
+    document.documentElement.setAttribute("data-theme", settings.theme);
+  }, [settings]);
+
+  useEffect(() => {
     let unlistenFocus: (() => void) | undefined;
     let unlistenSettings: (() => void) | undefined;
 
