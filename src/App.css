@@ -192,7 +192,7 @@ body {
 }
 
 #root {
-  border-radius: 18px;
+  border-radius: 0;
   overflow: hidden;
 }
 
