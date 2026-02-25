@@ -5,6 +5,7 @@ import { SettingsForm } from "@/components/organisms/settings/SettingsForm";
 import { SecondaryWindowTemplate } from "@/components/templates/SecondaryWindowTemplate";
 import { testGitLabConnection } from "@/lib/gitlab";
 import { loadSettings, saveSettings } from "@/lib/store";
+import { applyThemeMode } from "@/lib/theme";
 import type { Settings } from "@/lib/types";
 
 export function SettingsPage() {
@@ -24,7 +25,7 @@ export function SettingsPage() {
     if (!draft) {
       return;
     }
-    document.documentElement.setAttribute("data-theme", draft.theme);
+    applyThemeMode(draft.theme);
   }, [draft]);
 
   const handleSave = async () => {

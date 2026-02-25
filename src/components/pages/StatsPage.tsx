@@ -9,6 +9,7 @@ import { TicketStatsList } from "@/components/organisms/stats/TicketStatsList";
 import { SecondaryWindowTemplate } from "@/components/templates/SecondaryWindowTemplate";
 import { fetchAssignedTickets, fetchTicketLabelEvents, type TicketLabelEvent } from "@/lib/gitlab";
 import { loadSettings } from "@/lib/store";
+import { applyThemeMode } from "@/lib/theme";
 import type { Settings, TicketItem } from "@/lib/types";
 import { openSettingsWindow, type StatsFocusTicketPayload } from "@/lib/windows";
 
@@ -213,7 +214,7 @@ export function StatsPage() {
     if (!settings) {
       return;
     }
-    document.documentElement.setAttribute("data-theme", settings.theme);
+    applyThemeMode(settings.theme);
   }, [settings]);
 
   useEffect(() => {

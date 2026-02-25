@@ -30,6 +30,7 @@ import {
   type Settings,
   type TicketItem,
 } from "./lib/types";
+import { applyThemeMode } from "./lib/theme";
 import "./App.css";
 
 const EMPTY_SNAPSHOT: AppSnapshot = {
@@ -72,7 +73,7 @@ function MainWindowApp() {
   }, [settings, lastSeenCommentAt, lastNotifiedCommentAt]);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", settings.theme);
+    applyThemeMode(settings.theme);
   }, [settings.theme]);
 
   useEffect(() => {
