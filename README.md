@@ -60,6 +60,19 @@ bun run build
 bun run tauri build
 ```
 
+### Versioning
+Synchronise la version dans:
+- `package.json`
+- `src-tauri/tauri.conf.json`
+- `src-tauri/Cargo.toml`
+
+```bash
+bun run version:patch
+bun run version:minor
+bun run version:major
+bun run version:set -- 1.2.3
+```
+
 ## Configuration GitLab
 Dans `Réglages`, renseigner:
 - `GitLab base URL` (`https://gitlab.com` ou instance self-hosted)
