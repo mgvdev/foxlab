@@ -184,12 +184,12 @@ export function CommentsList({
                     ))}
                   <span className="linear-item-title">MR !{comment.mrIid}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
-                  <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
-                    Open
-                  </button>
-                </div>
+              <div className="comment-row-meta">
+                <span className="linear-item-meta">{comment.authorName} · {formatRelativeTime(comment.createdAt)}</span>
+                <button className="mr-inline-link" type="button" onClick={() => onOpen(comment.webUrl)}>
+                  Open
+                </button>
+              </div>
               </div>
               <p className="comments-item-body">{comment.body || "(sans contenu)"}</p>
             </div>

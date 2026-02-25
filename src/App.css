@@ -351,7 +351,9 @@ body {
 
 .themed-scroll-area [data-radix-scroll-area-viewport] > div {
   min-width: 100%;
-  padding-right: 10px;
+  max-width: 100%;
+  padding-right: 14px;
+  overflow-x: hidden;
 }
 
 .linear-item {
@@ -730,7 +732,9 @@ body {
 }
 
 .comment-row-head {
-  align-items: center;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .comment-head-main {
@@ -739,6 +743,19 @@ body {
   align-items: center;
   gap: 6px;
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+}
+
+.comment-row-meta {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .comment-avatar {
@@ -1176,21 +1193,21 @@ body {
 .mr-comment-head {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 6px;
   min-width: 0;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
 .mr-comment-meta {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  flex-shrink: 1;
-  margin-left: auto;
+  flex-shrink: 0;
+  margin-left: 0;
   max-width: 100%;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .mr-comment-check {
@@ -1204,9 +1221,10 @@ body {
   font-size: 11px;
   font-weight: 600;
   min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
 }
 
 .mr-comment-author-wrap {
@@ -1214,7 +1232,9 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  flex: 1 1 240px;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
 }
 
 .mr-comment-body {
