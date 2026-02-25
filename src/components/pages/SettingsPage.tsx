@@ -38,9 +38,10 @@ export function SettingsPage() {
     setStatusMessage(null);
 
     try {
+      const window = getCurrentWebviewWindow();
       await saveSettings(draft);
-      await getCurrentWebviewWindow().emit("settings:updated");
-      setStatusMessage("Réglages enregistrés.");
+      await window.emit("settings:updated");
+      await window.close();
     } catch (error) {
       setStatusMessage(error instanceof Error ? error.message : "Impossible d'enregistrer.");
     } finally {
