@@ -28,17 +28,8 @@ const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
 const AVATAR_OPTIONS = [true, false] as const;
 const THEME_PRESET_LABELS: Record<ThemePreset, string> = {
-  zinc: "Zinc",
-  slate: "Slate",
-  stone: "Stone",
-  neutral: "Neutral",
-  red: "Red",
-  rose: "Rose",
-  orange: "Orange",
-  green: "Green",
-  blue: "Blue",
-  yellow: "Yellow",
-  violet: "Violet",
+  claude: "Claude",
+  "light-green": "Light Green",
 };
 
 const SETTINGS_CATEGORIES: Array<{

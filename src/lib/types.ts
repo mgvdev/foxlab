@@ -1,30 +1,10 @@
 export type PollIntervalMinutes = 1 | 2 | 3 | 5;
 export type ThemeMode = "light" | "dark";
-export type ThemePreset =
-  | "zinc"
-  | "slate"
-  | "stone"
-  | "neutral"
-  | "red"
-  | "rose"
-  | "orange"
-  | "green"
-  | "blue"
-  | "yellow"
-  | "violet";
+export type ThemePreset = "claude" | "light-green";
 
 export const THEME_PRESET_OPTIONS: ThemePreset[] = [
-  "zinc",
-  "slate",
-  "stone",
-  "neutral",
-  "red",
-  "rose",
-  "orange",
-  "green",
-  "blue",
-  "yellow",
-  "violet",
+  "claude",
+  "light-green",
 ];
 
 export interface Settings {
@@ -162,7 +142,7 @@ export const DEFAULT_SETTINGS: Settings = {
   personalAccessToken: "",
   pollIntervalMinutes: 2,
   theme: "light",
-  themePreset: "orange",
+  themePreset: "claude",
   mutedMrIids: [],
   showCommentAvatars: true,
   cycleStartLabel: "",
