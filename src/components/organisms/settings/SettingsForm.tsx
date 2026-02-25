@@ -5,14 +5,18 @@ import type { PollIntervalMinutes, Settings, ThemeMode } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface SettingsFormProps {
+  activeCategory: SettingsCategory;
   draft: Settings;
   isSaving: boolean;
   isTestingConnection: boolean;
   statusMessage: string | null;
+  onCategoryChange: (next: SettingsCategory) => void;
   onChange: (next: Settings) => void;
   onTestConnection: () => void;
   onSave: () => void;
 }
+
+export type SettingsCategory = "connection" | "appearance" | "workflow";
 
 const INTERVAL_OPTIONS: PollIntervalMinutes[] = [1, 2, 3, 5];
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark"];
@@ -58,10 +62,12 @@ function OptionSegment<T extends string | number | boolean>({
 }
 
 export function SettingsForm({
+  activeCategory: _activeCategory,
   draft,
   isSaving,
   isTestingConnection,
   statusMessage,
+  onCategoryChange: _onCategoryChange,
   onChange,
   onTestConnection,
   onSave,

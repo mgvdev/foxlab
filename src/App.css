@@ -1644,6 +1644,65 @@ body {
   background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
 }
 
+.prefs-shell {
+  width: 100%;
+  min-height: 100vh;
+  padding: 12px;
+  background: transparent;
+}
+
+.prefs-window {
+  width: 100%;
+  min-height: calc(100vh - 24px);
+  border-radius: 18px;
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 74%, transparent 26%);
+  background: color-mix(in oklab, var(--ui-card-bg) 90%, var(--background) 10%);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.prefs-titlebar {
+  min-height: 42px;
+  border-bottom: 1px solid color-mix(in oklab, var(--ui-card-border) 74%, transparent 26%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: color-mix(in oklab, var(--ui-surface) 72%, var(--ui-card-bg) 28%);
+}
+
+.prefs-titlebar-drag {
+  min-height: 42px;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+}
+
+.prefs-titlebar-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ui-muted-fg);
+}
+
+.prefs-close-btn {
+  width: 28px;
+  height: 28px;
+  margin-right: 7px;
+  border: 1px solid color-mix(in oklab, var(--ui-card-border) 78%, transparent 22%);
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--ui-surface) 80%, transparent 20%);
+  color: var(--ui-fg);
+  cursor: pointer;
+}
+
+.prefs-close-btn:hover {
+  background: color-mix(in oklab, var(--ui-surface-hover) 84%, transparent 16%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .menubar-root {
     will-change: auto;

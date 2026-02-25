@@ -33,13 +33,14 @@ export async function openSettingsWindow(): Promise<void> {
   await openOrFocusWindow(SETTINGS_WINDOW_LABEL, {
     url: "/#settings",
     title: "Foxlab — Settings",
-    width: 520,
+    width: 980,
     height: 700,
-    minWidth: 520,
+    minWidth: 860,
     minHeight: 620,
     resizable: true,
     alwaysOnTop: false,
-    decorations: true,
+    decorations: false,
+    transparent: true,
     focus: true,
     center: true,
   });
