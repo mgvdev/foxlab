@@ -47,6 +47,18 @@ export interface MergeRequestDiscussionNote {
   resolved: boolean;
   resolvable: boolean;
   webUrl: string;
+  reference: MergeRequestDiscussionReference | null;
+}
+
+export interface MergeRequestDiscussionReference {
+  filePath: string | null;
+  oldPath: string | null;
+  newPath: string | null;
+  line: number | null;
+  oldLine: number | null;
+  newLine: number | null;
+  lineRangeStart: number | null;
+  lineRangeEnd: number | null;
 }
 
 export interface MergeRequestCiJob {

@@ -5,6 +5,7 @@ import type {
   MergeRequestDiscussionNote,
   MergeRequestItem,
 } from "../lib/types";
+import { buildMrCorrectionPrompt } from "../lib/mrPrompt";
 
 interface MrListProps {
   mrs: MergeRequestItem[];
@@ -74,6 +75,49 @@ function ciIconByStatus(status: string): string {
   return "•";
 }
 
+function formatDiscussionReferenceLabel(note: MergeRequestDiscussionNote): string {
+  if (!note.reference) {
+    return "Général";
+  }
+
+  const reference = note.reference;
+  const file =
+    reference.oldPath && reference.newPath && reference.oldPath !== reference.newPath
+      ? `${reference.oldPath} -> ${reference.newPath}`
+      : reference.filePath ?? "fichier inconnu";
+
+  if (
+    reference.lineRangeStart &&
+    reference.lineRangeEnd &&
+    reference.lineRangeStart !== reference.lineRangeEnd
+  ) {
+    return `${file}:${reference.lineRangeStart}-${reference.lineRangeEnd}`;
+  }
+
+  if (reference.line) {
+    return `${file}:${reference.line}`;
+  }
+
+  return file;
+}
+
+async function writeToClipboard(value: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(value);
+    return;
+  }
+
+  const textArea = document.createElement("textarea");
+  textArea.value = value;
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  document.execCommand("copy");
+  document.body.removeChild(textArea);
+}
+
 export function MrList({
   mrs,
   loading,
@@ -95,6 +139,8 @@ export function MrList({
   const [loadingByMr, setLoadingByMr] = useState<Record<number, boolean>>({});
   const [errorByMr, setErrorByMr] = useState<Record<number, string | null>>({});
   const [runningJobIds, setRunningJobIds] = useState<Set<number>>(new Set());
+  const [selectedNoteIdsByMr, setSelectedNoteIdsByMr] = useState<Record<number, number[]>>({});
+  const [copyFeedbackByMr, setCopyFeedbackByMr] = useState<Record<number, string | null>>({});
 
   const handlePlayManualJob = async (mr: MergeRequestItem, jobId: number) => {
     if (runningJobIds.has(jobId)) {
@@ -159,6 +205,57 @@ export function MrList({
     }
   };
 
+  const toggleNoteSelection = (mrId: number, noteId: number) => {
+    setSelectedNoteIdsByMr((current) => {
+      const selected = new Set(current[mrId] ?? []);
+      if (selected.has(noteId)) {
+        selected.delete(noteId);
+      } else {
+        selected.add(noteId);
+      }
+
+      return {
+        ...current,
+        [mrId]: [...selected],
+      };
+    });
+  };
+
+  const setAllSelections = (mrId: number, noteIds: number[]) => {
+    setSelectedNoteIdsByMr((current) => ({
+      ...current,
+      [mrId]: noteIds,
+    }));
+  };
+
+  const copyPromptForNotes = async (
+    mr: MergeRequestItem,
+    notes: MergeRequestDiscussionNote[],
+    source: "selection" | "all",
+  ) => {
+    if (notes.length === 0) {
+      setCopyFeedbackByMr((current) => ({
+        ...current,
+        [mr.id]: "Aucun commentaire à copier",
+      }));
+      return;
+    }
+
+    try {
+      const prompt = buildMrCorrectionPrompt(mr, notes);
+      await writeToClipboard(prompt);
+      setCopyFeedbackByMr((current) => ({
+        ...current,
+        [mr.id]: `${notes.length} commentaire(s) copié(s) (${source})`,
+      }));
+    } catch (error) {
+      setCopyFeedbackByMr((current) => ({
+        ...current,
+        [mr.id]: error instanceof Error ? error.message : "Impossible de copier le prompt",
+      }));
+    }
+  };
+
   const mutedSet = useMemo(() => new Set(mutedMrIids), [mutedMrIids]);
 
   const orderedMrs = useMemo(
@@ -216,11 +313,17 @@ export function MrList({
         const isMuted = mutedSet.has(mr.iid);
         const isExpanded = expandedIds.has(mr.id);
         const notes = commentCache[mr.id] ?? [];
+        const displayedNotes = notes.slice(0, 20);
         const ci = ciCache[mr.id];
         const isLoadingComments = loadingByMr[mr.id] ?? false;
         const mrError = errorByMr[mr.id];
         const approvedBy = mr.approvedBy ?? [];
         const isApproved = mr.approved && approvedBy.length > 0;
+        const selectedIds = selectedNoteIdsByMr[mr.id] ?? [];
+        const allDisplayedSelected =
+          displayedNotes.length > 0 && displayedNotes.every((note) => selectedIds.includes(note.id));
+        const selectedDisplayedNotes = displayedNotes.filter((note) => selectedIds.includes(note.id));
+        const copyFeedback = copyFeedbackByMr[mr.id];
         return (
           <div key={mr.id} className={`mr-accordion-item ${isMuted ? "mr-muted" : ""}`}>
             <div className="linear-item mr-item-trigger">
@@ -408,21 +511,63 @@ export function MrList({
                         )}
                       </div>
                     </div>
-                    {notes.length === 0 ? (
+                    {displayedNotes.length === 0 ? (
                       <div className="px-2 pb-2 text-xs text-muted">Aucun commentaire pour cette MR.</div>
                     ) : (
                       <div className="mr-comment-list">
-                        {notes.slice(0, 20).map((note) => (
-                          <button
-                            key={`${mr.id}-${note.id}`}
-                            className="mr-comment-item"
-                            type="button"
-                            onClick={() => onOpen(note.webUrl)}
-                          >
+                        <div className="mr-comment-toolbar">
+                          <div className="mr-comment-toolbar-group">
+                            <button
+                              className="mr-inline-tool-btn"
+                              type="button"
+                              onClick={() =>
+                                setAllSelections(
+                                  mr.id,
+                                  allDisplayedSelected ? [] : displayedNotes.map((note) => note.id),
+                                )
+                              }
+                            >
+                              {allDisplayedSelected ? "Désélectionner" : "Tout sélectionner"}
+                            </button>
+                            <button
+                              className="mr-inline-tool-btn"
+                              type="button"
+                              onClick={() => setAllSelections(mr.id, [])}
+                            >
+                              Effacer
+                            </button>
+                          </div>
+                          <div className="mr-comment-toolbar-group">
+                            <button
+                              className="mr-inline-tool-btn"
+                              disabled={selectedDisplayedNotes.length === 0}
+                              type="button"
+                              onClick={() => void copyPromptForNotes(mr, selectedDisplayedNotes, "selection")}
+                            >
+                              Copier sélection
+                            </button>
+                            <button
+                              className="mr-inline-tool-btn"
+                              type="button"
+                              onClick={() => void copyPromptForNotes(mr, displayedNotes, "all")}
+                            >
+                              Copier tout
+                            </button>
+                          </div>
+                        </div>
+                        {copyFeedback && <p className="mr-copy-feedback">{copyFeedback}</p>}
+                        {displayedNotes.map((note) => (
+                          <div key={`${mr.id}-${note.id}`} className="mr-comment-item">
                             <div className="mr-comment-head">
                               <div className="mr-comment-author-wrap">
-                                {showAvatars && (
-                                  note.authorAvatarUrl ? (
+                                <input
+                                  checked={selectedIds.includes(note.id)}
+                                  className="mr-comment-check"
+                                  type="checkbox"
+                                  onChange={() => toggleNoteSelection(mr.id, note.id)}
+                                />
+                                {showAvatars &&
+                                  (note.authorAvatarUrl ? (
                                     <img
                                       alt={note.authorName}
                                       className="comment-avatar"
@@ -432,8 +577,7 @@ export function MrList({
                                     <span className="comment-avatar comment-avatar-fallback">
                                       {initials(note.authorName)}
                                     </span>
-                                  )
-                                )}
+                                  ))}
                                 <span className="mr-comment-author">{note.authorName}</span>
                               </div>
                               <div className="flex items-center gap-1.5">
@@ -452,10 +596,20 @@ export function MrList({
                                   </Chip>
                                 )}
                                 <span className="linear-item-meta">{formatRelativeTime(note.createdAt)}</span>
+                                <button
+                                  className="mr-inline-link"
+                                  type="button"
+                                  onClick={() => onOpen(note.webUrl)}
+                                >
+                                  Open
+                                </button>
                               </div>
                             </div>
+                            {note.reference && (
+                              <p className="mr-comment-ref">{formatDiscussionReferenceLabel(note)}</p>
+                            )}
                             <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
-                          </button>
+                          </div>
                         ))}
                       </div>
                     )}

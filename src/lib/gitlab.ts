@@ -5,6 +5,7 @@ import {
   type MergeRequestApprover,
   type MergeRequestItem,
   type MergeRequestDiscussionNote,
+  type MergeRequestDiscussionReference,
   type MergeRequestCiStatus,
   type MergeRequestCiJob,
   MR_LIMIT,
@@ -73,10 +74,29 @@ interface RawDiscussionNote {
   resolvable?: boolean;
   resolved?: boolean;
   author?: { name?: string; avatar_url?: string | null };
+  position?: RawDiscussionPosition | null;
 }
 
 interface RawDiscussion {
   notes: RawDiscussionNote[];
+}
+
+interface RawDiscussionLinePoint {
+  new_line?: number | null;
+  old_line?: number | null;
+}
+
+interface RawDiscussionLineRange {
+  start?: RawDiscussionLinePoint | null;
+  end?: RawDiscussionLinePoint | null;
+}
+
+interface RawDiscussionPosition {
+  new_path?: string | null;
+  old_path?: string | null;
+  new_line?: number | null;
+  old_line?: number | null;
+  line_range?: RawDiscussionLineRange | null;
 }
 
 interface RawMrPipeline {
@@ -483,6 +503,47 @@ export async function setTicketTimeEstimate(
   throw buildGitLabError(response, `Estimate ticket #${ticket.iid}`);
 }
 
+function parseDiscussionReference(position: RawDiscussionPosition | null | undefined): MergeRequestDiscussionReference | null {
+  if (!position) {
+    return null;
+  }
+
+  const newPath = position.new_path?.trim() || null;
+  const oldPath = position.old_path?.trim() || null;
+  const filePath = newPath ?? oldPath;
+  const newLine = typeof position.new_line === "number" ? position.new_line : null;
+  const oldLine = typeof position.old_line === "number" ? position.old_line : null;
+  const rangeStart =
+    typeof position.line_range?.start?.new_line === "number"
+      ? position.line_range.start.new_line
+      : typeof position.line_range?.start?.old_line === "number"
+        ? position.line_range.start.old_line
+        : null;
+  const rangeEnd =
+    typeof position.line_range?.end?.new_line === "number"
+      ? position.line_range.end.new_line
+      : typeof position.line_range?.end?.old_line === "number"
+        ? position.line_range.end.old_line
+        : null;
+
+  const line = newLine ?? oldLine ?? rangeStart;
+
+  if (!filePath && !line && !rangeStart && !rangeEnd) {
+    return null;
+  }
+
+  return {
+    filePath,
+    oldPath,
+    newPath,
+    line,
+    oldLine,
+    newLine,
+    lineRangeStart: rangeStart,
+    lineRangeEnd: rangeEnd,
+  };
+}
+
 export async function fetchMergeRequestDiscussionNotes(
   settings: Settings,
   mr: MergeRequestItem,
@@ -515,6 +576,7 @@ export async function fetchMergeRequestDiscussionNotes(
         resolvable: note.resolvable ?? false,
         resolved: note.resolved ?? false,
         webUrl: `${mr.webUrl}#note_${note.id}`,
+        reference: parseDiscussionReference(note.position),
       });
     }
   }
