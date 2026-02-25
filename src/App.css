@@ -242,16 +242,16 @@ body {
 }
 
 .menubar-action-btn {
-  width: 27px;
-  height: 27px;
-  min-width: 27px;
+  width: 31px;
+  height: 31px;
+  min-width: 31px;
   padding: 0;
   border-radius: 999px;
 }
 
 .toolbar-icon {
-  width: 13px;
-  height: 13px;
+  width: 16px;
+  height: 16px;
 }
 
 .menubar-divider {
