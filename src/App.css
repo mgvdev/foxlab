@@ -69,7 +69,7 @@
   --ui-skeleton: color-mix(in oklab, var(--muted) 82%, var(--card) 18%);
 
   color: var(--foreground);
-  background: var(--background);
+  background: transparent;
   font-family: var(--font-sans);
   line-height: 1.35;
   text-rendering: optimizeLegibility;
@@ -179,6 +179,7 @@ body,
   width: 100%;
   min-width: 100%;
   min-height: 100%;
+  background: transparent;
 }
 
 body {
@@ -187,7 +188,7 @@ body {
 }
 
 #root {
-  border-radius: calc(var(--radius-lg) + 6px);
+  border-radius: 18px;
   overflow: hidden;
 }
 
@@ -202,7 +203,7 @@ body {
   background: color-mix(in oklab, var(--background) 88%, var(--card) 12%);
   color: var(--ui-fg);
   border: 1px solid color-mix(in oklab, var(--ui-card-border) 72%, transparent 28%);
-  border-radius: calc(var(--radius-lg) + 4px);
+  border-radius: 18px;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
