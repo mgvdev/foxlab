@@ -64,6 +64,46 @@ function TicketIcon() {
   );
 }
 
+function RefreshIcon() {
+  return (
+    <svg className="toolbar-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        d="M15.5 5.2V2.8m0 0h-2.4m2.4 0-2.2 2.1a6.5 6.5 0 1 0 2 5.4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChartIcon() {
+  return (
+    <svg className="toolbar-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M4 15.5h12" fill="none" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="5" y="9.5" width="2.5" height="5" rx="0.8" fill="currentColor" />
+      <rect x="8.75" y="7.2" width="2.5" height="7.3" rx="0.8" fill="currentColor" />
+      <rect x="12.5" y="5" width="2.5" height="9.5" rx="0.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function SettingsIcon() {
+  return (
+    <svg className="toolbar-icon" viewBox="0 0 20 20" aria-hidden="true">
+      <path
+        d="M10 6.8a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4Zm6.1 3.2-.9.5a5.6 5.6 0 0 1-.4 1l.5.9a.8.8 0 0 1-.1 1l-.7.8a.8.8 0 0 1-1 .1l-.9-.5a5.6 5.6 0 0 1-1 .4l-.5.9a.8.8 0 0 1-.8.5H9.7a.8.8 0 0 1-.8-.5l-.5-.9a5.6 5.6 0 0 1-1-.4l-.9.5a.8.8 0 0 1-1-.1l-.7-.8a.8.8 0 0 1-.1-1l.5-.9a5.6 5.6 0 0 1-.4-1l-.9-.5a.8.8 0 0 1-.4-.7v-1a.8.8 0 0 1 .4-.7l.9-.5a5.6 5.6 0 0 1 .4-1l-.5-.9a.8.8 0 0 1 .1-1l.7-.8a.8.8 0 0 1 1-.1l.9.5a5.6 5.6 0 0 1 1-.4l.5-.9a.8.8 0 0 1 .8-.5h1.1a.8.8 0 0 1 .8.5l.5.9a5.6 5.6 0 0 1 1 .4l.9-.5a.8.8 0 0 1 1 .1l.7.8a.8.8 0 0 1 .1 1l-.5.9a5.6 5.6 0 0 1 .4 1l.9.5a.8.8 0 0 1 .4.7v1a.8.8 0 0 1-.4.7Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function TrayPopover({
   snapshot,
   loading,
@@ -90,26 +130,45 @@ export function TrayPopover({
   return (
     <main className="menubar-root">
       <header className="menubar-header">
-        <div>
-          <p className="text-sm font-semibold">GitLab Companion</p>
-          <p className="text-xs text-muted">
+        <div className="menubar-title">
+          <p className="menubar-title-main">GitLab Companion</p>
+          <p className="menubar-title-sub">
             {snapshot.lastSyncAt
               ? `Sync ${new Date(snapshot.lastSyncAt).toLocaleTimeString()}`
               : "Pas encore synchronisé"}
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Button size="sm" variant="secondary" onPress={onManualRefresh}>
-            {isRefreshing ? "..." : "↻"}
+        <div className="menubar-actions">
+          <Button
+            aria-label="Rafraîchir"
+            className="menubar-action-btn"
+            size="sm"
+            variant="secondary"
+            onPress={onManualRefresh}
+          >
+            {isRefreshing ? "…" : <RefreshIcon />}
           </Button>
-          <Button size="sm" variant="secondary" onPress={onOpenStatsWindow}>
-            📊
+          <Button
+            aria-label="Ouvrir les stats"
+            className="menubar-action-btn"
+            size="sm"
+            variant="secondary"
+            onPress={onOpenStatsWindow}
+          >
+            <ChartIcon />
           </Button>
-          <Button size="sm" variant="secondary" onPress={onOpenSettings}>
-            ⚙
+          <Button
+            aria-label="Ouvrir les réglages"
+            className="menubar-action-btn"
+            size="sm"
+            variant="secondary"
+            onPress={onOpenSettings}
+          >
+            <SettingsIcon />
           </Button>
         </div>
       </header>
+      <div className="menubar-divider" />
 
       <section className="switch-row">
         <div className="segment-switch" role="tablist" aria-label="Vue">
@@ -145,10 +204,11 @@ export function TrayPopover({
           </button>
         </div>
 
-        <Chip color="accent" size="sm" variant="soft">
+        <Chip className="unread-pill" color="accent" size="sm" variant="soft">
           {snapshot.unreadCount}
         </Chip>
       </section>
+      <div className="menubar-divider" />
 
       <section className="content-zone">
         {activeTab === "comments" ? (
