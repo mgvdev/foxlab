@@ -13,6 +13,8 @@ interface CommentsListProps {
   showAvatars: boolean;
 }
 
+const COMMENT_PREVIEW_MAX = 500;
+
 function formatRelativeTime(isoDate: string): string {
   const diffMs = Date.now() - Date.parse(isoDate);
   const minutes = Math.max(1, Math.floor(diffMs / 60_000));
@@ -53,6 +55,19 @@ async function writeToClipboard(value: string): Promise<void> {
   textArea.select();
   document.execCommand("copy");
   document.body.removeChild(textArea);
+}
+
+function previewCommentBody(body: string): string {
+  const trimmed = body.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (trimmed.length <= COMMENT_PREVIEW_MAX) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, COMMENT_PREVIEW_MAX)}…`;
 }
 
 export function CommentsList({
@@ -191,10 +206,10 @@ export function CommentsList({
                 </button>
               </div>
               </div>
-              <p className="comments-item-body">{comment.body || "(sans contenu)"}</p>
-            </div>
-          ))}
-        </div>
+            <p className="comments-item-body">{previewCommentBody(comment.body) || "(sans contenu)"}</p>
+          </div>
+        ))}
+      </div>
       </ScrollArea>
     </div>
   );

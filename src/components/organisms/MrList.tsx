@@ -22,6 +22,8 @@ interface MrListProps {
   showAvatars: boolean;
 }
 
+const COMMENT_PREVIEW_MAX = 500;
+
 function formatRelativeTime(isoDate: string): string {
   const diffMs = Date.now() - Date.parse(isoDate);
   const minutes = Math.max(1, Math.floor(diffMs / 60_000));
@@ -182,6 +184,19 @@ function buildDiscussionThreads(notes: MergeRequestDiscussionNote[]): Discussion
   });
 
   return threads.sort((a, b) => Date.parse(b.latestActivityAt) - Date.parse(a.latestActivityAt));
+}
+
+function previewCommentBody(body: string): string {
+  const trimmed = body.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (trimmed.length <= COMMENT_PREVIEW_MAX) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, COMMENT_PREVIEW_MAX)}…`;
 }
 
 export function MrList({
@@ -762,7 +777,9 @@ export function MrList({
                                   </div>
                                 </div>
                                 {thread.root.reference && renderReference(mr.id, thread.root)}
-                                <p className="mr-comment-body">{thread.root.body || "(sans contenu)"}</p>
+                                <p className="mr-comment-body">
+                                  {previewCommentBody(thread.root.body) || "(sans contenu)"}
+                                </p>
                                 {hasReplies && (
                                   <div className="mr-thread-toggle-row">
                                     <button
@@ -820,7 +837,9 @@ export function MrList({
                                         </div>
                                       </div>
                                       {note.reference && renderReference(mr.id, note)}
-                                      <p className="mr-comment-body">{note.body || "(sans contenu)"}</p>
+                                      <p className="mr-comment-body">
+                                        {previewCommentBody(note.body) || "(sans contenu)"}
+                                      </p>
                                     </div>
                                   ))}
                                 </div>
