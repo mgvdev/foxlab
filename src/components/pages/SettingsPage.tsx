@@ -43,7 +43,7 @@ export function SettingsPage() {
       await window.emit("settings:updated");
       await window.close();
     } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "Impossible d'enregistrer.");
+      setStatusMessage(error instanceof Error ? error.message : String(error) || "Impossible d'enregistrer.");
     } finally {
       setIsSaving(false);
     }
@@ -61,7 +61,7 @@ export function SettingsPage() {
       const user = await testGitLabConnection(draft);
       setStatusMessage(`Connexion OK: ${user.name} (@${user.username})`);
     } catch (error) {
-      setStatusMessage(error instanceof Error ? error.message : "Échec du test de connexion.");
+      setStatusMessage(error instanceof Error ? error.message : String(error) || "Échec du test de connexion.");
     } finally {
       setIsTestingConnection(false);
     }
